@@ -55,6 +55,8 @@ class MockSpeechSynthesisUtterance {
 const mockSpeechSynthesis = {
   speak: vi.fn(),
   cancel: vi.fn(),
+  resume: vi.fn(),
+  pause: vi.fn(),
   getVoices: vi.fn().mockReturnValue([]),
   onvoiceschanged: null as (() => void) | null,
   speaking: false,

@@ -60,9 +60,9 @@ describe('useTTSOutput', () => {
     vi.clearAllMocks();
   });
 
-  it('calls prewarm() on mount', () => {
+  it('does not call prewarm() on mount (prewarm is no-op)', () => {
     renderHook(() => useTTSOutput(captureManager));
-    expect(mockPrewarm).toHaveBeenCalledOnce();
+    expect(mockPrewarm).not.toHaveBeenCalled();
   });
 
   it('calls speak() when predictedWord changes to non-null in store', () => {
