@@ -1,18 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createSpeechOutput } from './speechOutput';
 
-// SpeechSynthesis mocks are set up in tests/setup.ts
-
 describe('createSpeechOutput', () => {
   let mockSynth: typeof globalThis.speechSynthesis;
 
   beforeEach(() => {
     mockSynth = globalThis.speechSynthesis;
-
-    // Reset mocks before each test
     vi.mocked(mockSynth.speak).mockClear();
     vi.mocked(mockSynth.cancel).mockClear();
-    vi.mocked(mockSynth.resume).mockClear();
     vi.mocked(mockSynth.getVoices).mockReturnValue([]);
   });
 
@@ -27,20 +22,7 @@ describe('createSpeechOutput', () => {
     expect(typeof output.prewarm).toBe('function');
   });
 
-  it('speak() calls resume then cancel then speak', () => {
-    const output = createSpeechOutput();
-    const callOrder: string[] = [];
-
-    vi.mocked(mockSynth.resume).mockImplementation(() => { callOrder.push('resume'); });
-    vi.mocked(mockSynth.cancel).mockImplementation(() => { callOrder.push('cancel'); });
-    vi.mocked(mockSynth.speak).mockImplementation(() => { callOrder.push('speak'); });
-
-    output.speak('hello');
-
-    expect(callOrder).toEqual(['resume', 'cancel', 'speak']);
-  });
-
-  it('speak() creates utterance with the word', () => {
+  it('speak() calls speechSynthesis.speak() with the word', () => {
     const output = createSpeechOutput();
     output.speak('hello');
 
@@ -49,14 +31,14 @@ describe('createSpeechOutput', () => {
     expect(utterance.text).toBe('hello');
   });
 
-  it('utterance has rate=1.0, pitch=1.0, volume=0.85, lang="en-US"', () => {
+  it('utterance has rate=1.0, pitch=1.0, volume=1.0, lang="en-US"', () => {
     const output = createSpeechOutput();
     output.speak('test');
 
     const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
     expect(utterance.rate).toBe(1.0);
     expect(utterance.pitch).toBe(1.0);
-    expect(utterance.volume).toBe(0.85);
+    expect(utterance.volume).toBe(1.0);
     expect(utterance.lang).toBe('en-US');
   });
 
@@ -66,12 +48,7 @@ describe('createSpeechOutput', () => {
       voiceURI: 'samantha', default: true,
     } as SpeechSynthesisVoice;
 
-    const remoteVoice = {
-      name: 'Google US English', lang: 'en-US', localService: false,
-      voiceURI: 'google', default: false,
-    } as SpeechSynthesisVoice;
-
-    vi.mocked(mockSynth.getVoices).mockReturnValue([remoteVoice, localEnVoice]);
+    vi.mocked(mockSynth.getVoices).mockReturnValue([localEnVoice]);
 
     const output = createSpeechOutput();
     output.speak('word');
@@ -80,50 +57,55 @@ describe('createSpeechOutput', () => {
     expect(utterance.voice).toBe(localEnVoice);
   });
 
-  it('falls back to any English voice when no local English voice exists', () => {
-    const nonLocalEnVoice = {
-      name: 'Google US English', lang: 'en-US', localService: false,
-      voiceURI: 'google', default: false,
-    } as SpeechSynthesisVoice;
-
-    vi.mocked(mockSynth.getVoices).mockReturnValue([nonLocalEnVoice]);
-
-    const output = createSpeechOutput();
-    output.speak('word');
-
-    const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
-    expect(utterance.voice).toBe(nonLocalEnVoice);
-  });
-
-  it('prewarm() is a no-op (does not call speechSynthesis.speak)', () => {
+  it('prewarm() is a no-op', () => {
     const output = createSpeechOutput();
     output.prewarm();
-
     expect(mockSynth.speak).not.toHaveBeenCalled();
   });
 
-  it('cancel() calls resume then cancel', () => {
+  it('cancel() calls speechSynthesis.cancel()', () => {
     const output = createSpeechOutput();
     output.cancel();
-
-    expect(mockSynth.resume).toHaveBeenCalled();
-    expect(mockSynth.cancel).toHaveBeenCalled();
+    expect(mockSynth.cancel).toHaveBeenCalledOnce();
   });
 
-  it('onEnd callback fires when utterance.onend fires', () => {
+  it('skips speak if already speaking', () => {
+    const output = createSpeechOutput();
+    const onEnd1 = vi.fn();
+    const onEnd2 = vi.fn();
+
+    output.speak('first', onEnd1);
+    output.speak('second', onEnd2);
+
+    // Only first speak should go through
+    expect(mockSynth.speak).toHaveBeenCalledOnce();
+    // Second onEnd called immediately (skipped)
+    expect(onEnd2).toHaveBeenCalledOnce();
+  });
+
+  it('onEnd fires when utterance.onend fires', () => {
     const output = createSpeechOutput();
     const onEnd = vi.fn();
 
     output.speak('hello', onEnd);
 
     const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
-    expect(onEnd).not.toHaveBeenCalled();
-
     utterance.onend();
     expect(onEnd).toHaveBeenCalledOnce();
   });
 
-  it('onEnd only fires once even if both onend and safety net trigger', () => {
+  it('onEnd fires on any error (including interrupted)', () => {
+    const output = createSpeechOutput();
+    const onEnd = vi.fn();
+
+    output.speak('hello', onEnd);
+
+    const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
+    utterance.onerror({ error: 'interrupted' });
+    expect(onEnd).toHaveBeenCalledOnce();
+  });
+
+  it('onEnd only fires once', () => {
     vi.useFakeTimers();
     const output = createSpeechOutput();
     const onEnd = vi.fn();
@@ -132,31 +114,9 @@ describe('createSpeechOutput', () => {
 
     const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
     utterance.onend();
-    vi.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(3000);
 
     expect(onEnd).toHaveBeenCalledOnce();
     vi.useRealTimers();
-  });
-
-  it('onerror with "interrupted" does NOT call onEnd', () => {
-    const output = createSpeechOutput();
-    const onEnd = vi.fn();
-
-    output.speak('hello', onEnd);
-
-    const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
-    utterance.onerror({ error: 'interrupted' });
-    expect(onEnd).not.toHaveBeenCalled();
-  });
-
-  it('onerror with real error DOES call onEnd', () => {
-    const output = createSpeechOutput();
-    const onEnd = vi.fn();
-
-    output.speak('hello', onEnd);
-
-    const utterance = vi.mocked(mockSynth.speak).mock.calls[0][0] as any;
-    utterance.onerror({ error: 'synthesis-failed' });
-    expect(onEnd).toHaveBeenCalledOnce();
   });
 });

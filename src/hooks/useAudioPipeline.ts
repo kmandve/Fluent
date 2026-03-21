@@ -12,13 +12,6 @@ export function useAudioPipeline() {
   const isListening = useSessionStore((s) => s.isListening);
 
   const start = useCallback(async () => {
-    // Unlock Chrome's SpeechSynthesis during the user gesture (button click).
-    // Chrome requires a speak() call within a click handler to enable TTS.
-    // This silent utterance unlocks the audio pipeline for future async calls.
-    const unlockUtterance = new SpeechSynthesisUtterance('');
-    unlockUtterance.volume = 0;
-    window.speechSynthesis.speak(unlockUtterance);
-
     const manager = captureManagerRef.current;
     const stream = await manager.start();
 
