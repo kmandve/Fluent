@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { StutterEvent } from '../detection/types';
+import type { PredictionResult } from '../prediction/types';
 
 export interface TranscriptEntry {
   id: string;
@@ -17,6 +18,7 @@ export interface SessionState {
 
   detectionEvents: StutterEvent[];
   lastDetection: StutterEvent | null;
+  predictedWord: PredictionResult | null;
 
   setListening: (listening: boolean) => void;
   addFinalTranscript: (text: string) => void;
@@ -25,6 +27,8 @@ export interface SessionState {
   setErrorState: (state: SessionState['errorState']) => void;
   addDetectionEvent: (event: StutterEvent) => void;
   clearDetectionEvents: () => void;
+  setPredictedWord: (result: PredictionResult) => void;
+  clearPredictedWord: () => void;
   resetSession: () => void;
 }
 
@@ -36,6 +40,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   errorState: 'none',
   detectionEvents: [],
   lastDetection: null,
+  predictedWord: null,
 
   setListening: (listening) => set({ isListening: listening }),
   addFinalTranscript: (text) =>
@@ -60,6 +65,8 @@ export const useSessionStore = create<SessionState>((set) => ({
       lastDetection: event,
     })),
   clearDetectionEvents: () => set({ detectionEvents: [], lastDetection: null }),
+  setPredictedWord: (result) => set({ predictedWord: result }),
+  clearPredictedWord: () => set({ predictedWord: null }),
   resetSession: () =>
     set({
       isListening: false,
@@ -69,5 +76,6 @@ export const useSessionStore = create<SessionState>((set) => ({
       errorState: 'none',
       detectionEvents: [],
       lastDetection: null,
+      predictedWord: null,
     }),
 }));
