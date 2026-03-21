@@ -114,10 +114,10 @@ Plans:
 
 **Requirements**: VAD-01, VAD-02, VAD-03
 **Depends on:** Phase 5
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 06-01-PLAN.md — VAD constants, speech-gated audio_callback with hangover + cue tone, --vad-threshold CLI flag
+- [x] 06-01-PLAN.md — VAD constants, speech-gated audio_callback with hangover + cue tone, --vad-threshold CLI flag
 
 ### Phase 7: Pi Deployment and Demo Hardening — Deploy to Raspberry Pi, pair Bluetooth headphones, configure auto-start on boot, battery-powered portable demo ready
 
