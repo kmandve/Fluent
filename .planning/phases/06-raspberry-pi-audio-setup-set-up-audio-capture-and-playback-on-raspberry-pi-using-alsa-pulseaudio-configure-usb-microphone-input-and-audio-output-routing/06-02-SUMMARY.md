@@ -34,7 +34,7 @@ decisions:
 metrics:
   duration_seconds: 131
   completed_date: "2026-03-21"
-  tasks_completed: 1
+  tasks_completed: 2
   tasks_total: 2
   files_created: 3
   files_modified: 1
@@ -105,13 +105,16 @@ Platform-aware auto-detection via `platform.system()`:
 - **Files modified:** `pi-daf/main.py`
 - **Commit:** ef4292f
 
-## Status: Task 2 — Awaiting Checkpoint
+## Status: Task 2 — APPROVED
 
-Task 2 is a `checkpoint:human-verify` — real hardware audio testing required. The code is ready; verification requires:
-1. On **Mac**: plug in headphones, run `python3 main.py` from `pi-daf/`, speak and listen for delayed echo
-2. On **Pi**: pair Beat Buds via bluetoothctl, then run `python3 main.py --mac AA:BB:CC:DD:EE:FF`
+Task 2 human-verify checkpoint was approved. The user tested DAF on Mac hardware:
+- Ran `python3 main.py` from `pi-daf/` on Mac
+- Heard delayed echo of own voice through headphones
+- Delay of 20ms was preferred over the original 50ms — feels more natural, less disorienting
+- Fixed: DELAY_MS reduced from 50ms to 20ms in config.py (commit `2731fad`)
+- Pi BT hardware verification deferred to a later session (not blocking)
 
-See the checkpoint message for exact verification steps.
+**Phase 6 is complete.**
 
 ## Known Stubs
 
@@ -127,3 +130,5 @@ Files created:
 
 Commits:
 - [x] ef4292f — feat(06-02): create BT helper, DAF engine, and main entry point
+- [x] 2731fad — fix(06-02): reduce DAF delay from 50ms to 20ms — user preferred shorter delay
+- [x] 84b004f — docs(06-02): complete DAF engine plan — checkpoint:human-verify reached

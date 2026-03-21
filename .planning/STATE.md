@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: "Phase 06 Plan 02 — checkpoint:human-verify (Task 1 complete, awaiting Mac/Pi audio test)"
-last_updated: "2026-03-21T20:47:52.247Z"
+status: in-progress
+stopped_at: "Phase 06 Plan 02 — COMPLETE (DAF verified on Mac at 20ms delay, Pi deferred)"
+last_updated: "2026-03-21T21:30:00.000Z"
 progress:
   total_phases: 10
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # State: Fluent
@@ -22,8 +22,8 @@ progress:
 
 ## Current Position
 
-Phase: 06 (raspberry-pi-audio-setup) — EXECUTING
-Plan: 2 of 2
+Phase: 06 (raspberry-pi-audio-setup) — COMPLETE
+Plan: 2 of 2 — all plans complete
 
 ## Performance Metrics
 
@@ -47,7 +47,7 @@ Plan: 2 of 2
 | Phase 04 P01 | 188 | 2 tasks | 5 files |
 | Phase 04 P02 | 15 | 1 tasks | 6 files |
 | Phase 06 P01 | 5 | 1 tasks | 5 files (Task 2 skipped — Pi deferred) |
-| Phase 06 P02 | 131 | 1 tasks | 4 files |
+| Phase 06 P02 | 131 | 2 tasks | 4 files (Task 2 verified on Mac at 20ms delay; Pi BT deferred) |
 
 ## Accumulated Context
 
@@ -72,6 +72,7 @@ Plan: 2 of 2
 | Mac-first SAMPLE_RATE: platform auto-detect in config.py | 44100 Hz on Darwin (Mac default device); 8000 Hz on Linux (Pi HFP CVSD) — no manual switching needed | Phase 06 |
 | bt_setup.py Linux-only with _is_linux() guard | bluetoothctl is Linux-only; returns no-op on Mac with clear message instead of FileNotFoundError | Phase 06 |
 | main.py Mac fallback: None device when no BT match found | Mac has no "bluez" device; gracefully falls back to system default so DAF can be tested on Mac hardware | Phase 06 |
+| DAF DELAY_MS reduced from 50ms to 20ms | User tested both on Mac; 20ms echo felt more natural — 50ms was perceptible as an uncomfortable delay | Phase 06 |
 
 ### Critical Risks
 
@@ -113,16 +114,17 @@ None currently.
 
 ## Session Continuity
 
-**Last session:** 2026-03-21T20:47:40.679Z
-**Stopped at:** Phase 06 Plan 02 — checkpoint:human-verify (Task 1 complete, awaiting Mac/Pi audio test)
-**Next action:** Execute Phase 06 Plan 02 (DAF engine + BT pairing) on Mac first
+**Last session:** 2026-03-21T21:30:00.000Z
+**Stopped at:** Phase 06 Plan 02 — COMPLETE
+**Next action:** Phase 07 (Bluetooth Headphone Connection) or Pi hardware session for BT HFP verification
 
 **Context for next session:**
 
-- Phase 06 Plan 01 complete: pi-daf/ scaffold created with setup.sh, config.py, audio/device_utils.py
-- User chose Mac-first approach: build and test DAF engine on Mac, deploy to Pi later
-- Pi setup.sh is ready and can be run on Pi hardware when available
-- Phase 06 Plan 02 (BT pairing helper, DAF engine, main.py) should be developed Mac-first then verified on Pi
+- Phase 06 complete: pi-daf/ fully implemented — BT helper, DAF engine (ring buffer), main.py CLI entry point
+- DAF verified on Mac at 20ms delay — user heard delayed echo, approved
+- Pi BT hardware verification deferred — Pi not available during session; code is Pi-ready
+- DELAY_MS changed from 50ms to 20ms in config.py after user audio test
+- Pi SCO/HFP mic fix may be needed: `sudo hcitool cmd 0x3f 0x01c 0x01 0x02 0x00 0x01 0x01`
 
 ---
 *State initialized: 2026-03-20*

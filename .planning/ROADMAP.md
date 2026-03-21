@@ -14,6 +14,7 @@
 - [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; OpenAI LLM fallback fires async within 200ms budget
 - [x] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic (completed 2026-03-21)
 - [ ] **Phase 5: UI Polish and Demo Hardening** - Judge-ready live demo with visual feedback, error states, and a verified demo checklist
+- [x] **Phase 6: Raspberry Pi Audio Setup** - DAF engine with ring buffer verified on Mac at 20ms delay; BT helper and Pi scaffold ready (completed 2026-03-21)
 
 ---
 
@@ -137,6 +138,11 @@ Plans:
 | 3. Prediction Pipeline | 1/2 | In Progress|  |
 | 4. TTS Integration and Echo Prevention | 2/2 | Complete   | 2026-03-21 |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |
+| 6. Raspberry Pi Audio Setup | 2/2 | Complete   | 2026-03-21 |
+| 7. Bluetooth Headphone Connection | 0/? | Not started | - |
+| 8. Conversation Detection (VAD) | 0/? | Not started | - |
+| 9. DAF Engine | 0/? | Not started | - |
+| 10. Integration and Demo Hardening | 0/? | Not started | - |
 
 ---
 
@@ -171,7 +177,7 @@ Plans:
 
 **Coverage: 24/24 v1 requirements mapped.**
 
-### Phase 6: Raspberry Pi Audio Setup
+### Phase 6: Raspberry Pi Audio Setup (Complete — 2026-03-21)
 
 **Goal:** Install PipeWire + WirePlumber audio stack on Raspberry Pi OS Lite, configure HFP Bluetooth profile for Beat Buds headphones (mic + speaker), scaffold the pi-daf Python project, and verify bidirectional audio with delayed playback.
 
@@ -181,7 +187,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — Pi setup script (PipeWire + WirePlumber + HFP config), project scaffold (config.py, device_utils.py) — Pi hardware verification deferred; Mac-first development approach
-- [x] 06-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point, end-to-end audio verification
+- [x] 06-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point — DAF verified on Mac at 20ms delay; Pi BT verification deferred
 
 ### Phase 7: Bluetooth Headphone Connection — Pair and connect Bluetooth wireless headphones to Raspberry Pi, configure as audio output sink with low-latency A2DP profile
 
