@@ -89,36 +89,36 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIO-01 | Pending | Pending |
-| AUDIO-02 | Pending | Pending |
-| AUDIO-03 | Pending | Pending |
-| AUDIO-04 | Pending | Pending |
-| TRANS-01 | Pending | Pending |
-| TRANS-02 | Pending | Pending |
-| TRANS-03 | Pending | Pending |
-| STUT-01 | Pending | Pending |
-| STUT-02 | Pending | Pending |
-| STUT-03 | Pending | Pending |
-| STUT-04 | Pending | Pending |
-| STUT-05 | Pending | Pending |
-| PRED-01 | Pending | Pending |
-| PRED-02 | Pending | Pending |
-| PRED-03 | Pending | Pending |
-| PRED-04 | Pending | Pending |
-| PRED-05 | Pending | Pending |
-| OUT-01 | Pending | Pending |
-| OUT-02 | Pending | Pending |
-| OUT-03 | Pending | Pending |
-| OUT-04 | Pending | Pending |
-| UI-01 | Pending | Pending |
-| UI-02 | Pending | Pending |
-| UI-03 | Pending | Pending |
+| AUDIO-01 | Phase 1 | Pending |
+| AUDIO-02 | Phase 1 | Pending |
+| AUDIO-03 | Phase 1 | Pending |
+| AUDIO-04 | Phase 1 | Pending |
+| TRANS-01 | Phase 1 | Pending |
+| TRANS-02 | Phase 1 | Pending |
+| TRANS-03 | Phase 1 | Pending |
+| STUT-01 | Phase 2 | Pending |
+| STUT-02 | Phase 2 | Pending |
+| STUT-03 | Phase 2 | Pending |
+| STUT-04 | Phase 2 | Pending |
+| STUT-05 | Phase 2 | Pending |
+| PRED-01 | Phase 3 | Pending |
+| PRED-02 | Phase 3 | Pending |
+| PRED-03 | Phase 3 | Pending |
+| PRED-04 | Phase 3 | Pending |
+| PRED-05 | Phase 3 | Pending |
+| OUT-01 | Phase 4 | Pending |
+| OUT-02 | Phase 4 | Pending |
+| OUT-03 | Phase 4 | Pending |
+| OUT-04 | Phase 4 | Pending |
+| UI-01 | Phase 5 | Pending |
+| UI-02 | Phase 5 | Pending |
+| UI-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 24 total
-- Mapped to phases: 0
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after initial definition*
+*Last updated: 2026-03-20 after roadmap creation — traceability complete*
