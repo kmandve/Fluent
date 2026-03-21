@@ -71,5 +71,5 @@ export function useAudioPipeline() {
     useSessionStore.getState().setEnergyLevel(0);
   }, []);
 
-  return { start, stop, isListening };
+  return { start, stop, isListening, captureManager: captureManagerRef.current };
 }

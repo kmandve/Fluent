@@ -5,6 +5,7 @@ export function TranscriptDisplay() {
   const transcript = useSessionStore((s) => s.transcript);
   const interimText = useSessionStore((s) => s.interimText);
   const isListening = useSessionStore((s) => s.isListening);
+  const predictedWord = useSessionStore((s) => s.predictedWord);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // D-02: Auto-scroll to keep latest text visible
@@ -32,6 +33,18 @@ export function TranscriptDisplay() {
           {/* Interim text shown in gray italic at the bottom */}
           {interimText && (
             <p className="text-gray-400 text-lg italic">{interimText}</p>
+          )}
+
+          {/* Predicted word flash — visible while predictedWord is non-null (OUT-02) */}
+          {predictedWord && (
+            <div className="mt-2 px-3 py-1 bg-green-600/30 border border-green-500/50 rounded-md inline-block animate-pulse">
+              <span className="text-green-300 text-lg font-semibold">
+                {predictedWord.word}
+              </span>
+              <span className="text-green-400/60 text-sm ml-2">
+                (spoken)
+              </span>
+            </div>
           )}
         </>
       )}
