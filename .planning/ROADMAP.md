@@ -33,10 +33,10 @@
   3. Deliberately holding silence for 5 seconds does not kill the transcript — the app auto-restarts recognition invisibly and resumes capturing on next speech
   4. The Web Audio API energy track is computing RMS values in parallel — confirmed via console output or a debug energy readout before UI phase
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold project (Vite 8 + React 19 + Tailwind 4), Zustand store, browser compat, Vitest setup
+- [x] 01-01-PLAN.md — Scaffold project (Vite 8 + React 19 + Tailwind 4), Zustand store, browser compat, Vitest setup
 - [ ] 01-02-PLAN.md — Dual-track audio pipeline (captureManager + acousticAnalyzer + useAudioPipeline hook)
 - [ ] 01-03-PLAN.md — UI components (TranscriptDisplay, ControlBar, ErrorOverlay, App) + live verification
 
@@ -119,7 +119,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Audio Pipeline Foundation | 0/3 | Planning complete | - |
+| 1. Audio Pipeline Foundation | 1/3 | In Progress|  |
 | 2. Stutter Detection Engine | 0/? | Not started | - |
 | 3. Prediction Pipeline | 0/? | Not started | - |
 | 4. TTS Integration and Echo Prevention | 0/? | Not started | - |

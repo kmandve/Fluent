@@ -11,8 +11,8 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 
 - [ ] **AUDIO-01**: User can grant microphone permission via browser prompt
 - [ ] **AUDIO-02**: App captures continuous audio from browser microphone
-- [ ] **AUDIO-03**: User can start and stop listening with a single button
-- [ ] **AUDIO-04**: App works in Chrome browser with no installation required
+- [x] **AUDIO-03**: User can start and stop listening with a single button
+- [x] **AUDIO-04**: App works in Chrome browser with no installation required
 
 ### Speech Transcription
 
@@ -91,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | AUDIO-01 | Phase 1 | Pending |
 | AUDIO-02 | Phase 1 | Pending |
-| AUDIO-03 | Phase 1 | Pending |
-| AUDIO-04 | Phase 1 | Pending |
+| AUDIO-03 | Phase 1 | Complete |
+| AUDIO-04 | Phase 1 | Complete |
 | TRANS-01 | Phase 1 | Pending |
 | TRANS-02 | Phase 1 | Pending |
 | TRANS-03 | Phase 1 | Pending |
