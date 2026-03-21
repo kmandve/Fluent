@@ -5,9 +5,9 @@ import { useSessionStore } from '../store/sessionStore';
 
 // ─── Threshold Constants ──────────────────────────────────────────────────────
 
-export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.012;
+export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.02;
 export const BLOCK_CONFIRM_MS = 600;
-export const TRANSCRIPT_STALL_MS = 350;
+export const TRANSCRIPT_STALL_MS = 300;
 export const CONFIDENCE_THRESHOLD = 0.75;
 export const COOLDOWN_MS = 2000;
 export const CALIBRATION_DURATION_MS = 2500;
@@ -47,8 +47,10 @@ export function calibrateAmbientNoise(
       const p95 = sorted[Math.min(p95Index, sorted.length - 1)];
       const computed = p95 * 1.5;
 
-      // Cap: never exceed the default threshold (avoids overly permissive thresholds)
-      resolve(Math.min(computed, BLOCK_ENERGY_THRESHOLD_DEFAULT));
+      // Use the higher of computed and default — ambient noise floor should raise the threshold, not lower it
+      const threshold = Math.max(computed, BLOCK_ENERGY_THRESHOLD_DEFAULT);
+      console.debug('[calibration] p95:', p95.toFixed(5), 'computed:', computed.toFixed(5), 'final threshold:', threshold.toFixed(5));
+      resolve(threshold);
     }, durationMs);
   });
 }
@@ -121,19 +123,16 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       ctx.state = 'FLUENT';
     }
 
-    // 4. Sentence-end guard: if interim text just went empty while previous had content,
-    //    that's a finalized sentence — not a block. Reset FSM state.
-    if (interimText === '' && previousInterimText !== '') {
-      if (ctx.state === 'ONSET_SILENCE') {
-        ctx.state = 'FLUENT';
-        ctx.silenceStartMs = null;
+    // 4. Empty transcript handling
+    if (interimText === '') {
+      // If we're already tracking a block (ONSET_SILENCE), keep tracking —
+      // the empty interim might mean recognition restarted during the block.
+      // Only suppress if we're in FLUENT state (normal sentence end).
+      if (ctx.state === 'FLUENT') {
+        return null;
       }
-      return null;
-    }
-
-    // 5. Guard: empty-to-empty transcript (recognition restart, no speech yet)
-    if (interimText === '' && previousInterimText === '') {
-      return null;
+      // In ONSET_SILENCE: don't reset — the block is still happening
+      // Fall through to block FSM which will confirm or reject based on timing
     }
 
     // 6. Repetition check (takes priority over block — repetitions can coexist with moderate energy)
@@ -192,10 +191,18 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       return null;
     }
 
+    // Debug: log state transitions (remove for production)
+    if (ctx.state !== 'FLUENT') {
+      console.debug('[detector]', ctx.state, 'energy:', energyLevel.toFixed(4), 'threshold:', blockEnergyThreshold.toFixed(4), 'interim:', interimText.slice(-20));
+    }
+
     switch (ctx.state) {
       case 'FLUENT': {
+        // Only enter ONSET_SILENCE if there was recent speech activity
+        // (lastInterimChangeMs was set at some point during this session)
+        const hadRecentSpeech = ctx.lastInterimChangeMs > 0;
         const transcriptStalled = now - ctx.lastInterimChangeMs > TRANSCRIPT_STALL_MS;
-        if (energyLevel < blockEnergyThreshold && transcriptStalled && interimText !== '') {
+        if (energyLevel < blockEnergyThreshold && transcriptStalled && hadRecentSpeech) {
           ctx.state = 'ONSET_SILENCE';
           ctx.silenceStartMs = now;
         }

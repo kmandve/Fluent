@@ -339,8 +339,8 @@ describe('createStutterDetector', () => {
       await vi.advanceTimersByTimeAsync(600);
       const threshold = await calibratePromise;
 
-      // Should be capped at BLOCK_ENERGY_THRESHOLD_DEFAULT
-      expect(threshold).toBeLessThanOrEqual(BLOCK_ENERGY_THRESHOLD_DEFAULT);
+      // Loud environment: threshold should be raised above default (p95 * 1.5 of 0.1 = 0.15)
+      expect(threshold).toBeGreaterThanOrEqual(BLOCK_ENERGY_THRESHOLD_DEFAULT);
       vi.useRealTimers();
     });
   });
