@@ -11,7 +11,7 @@
 
 - [x] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track (completed 2026-03-21)
 - [x] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating (completed 2026-03-21)
-- [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; Groq LLM fallback fires async within 200ms budget
+- [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; OpenAI LLM fallback fires async within 200ms budget
 - [ ] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic
 - [ ] **Phase 5: UI Polish and Demo Hardening** - Judge-ready live demo with visual feedback, error states, and a verified demo checklist
 
@@ -77,10 +77,14 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. After a stutter detection event, a predicted word string is available within the pipeline in under 500ms total (measured with performance.now() at each stage)
   2. The local n-gram/frequency model produces a prediction synchronously in under 5ms using the rolling transcript context
-  3. When local model confidence is below 0.7, a Groq API call fires asynchronously — if it returns within 200ms it replaces the local prediction; otherwise the local prediction is used
+  3. When local model confidence is below 0.7, an OpenAI API call fires asynchronously — if it returns within 200ms it replaces the local prediction; otherwise the local prediction is used
   4. If both the LLM API and the local model fail, a frequency-list fallback still produces a prediction — the pipeline never returns empty
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Local prediction layer: types, word frequency data, bigram index, localPredictor, contextBuilder, store extension
+- [ ] 03-02-PLAN.md — LLM client (OpenAI streaming), prediction engine orchestrator, usePredictionPipeline hook wiring
 
 ---
 
@@ -126,7 +130,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
 | 2. Stutter Detection Engine | 3/3 | Complete   | 2026-03-21 |
-| 3. Prediction Pipeline | 0/? | Not started | - |
+| 3. Prediction Pipeline | 0/2 | Planned | - |
 | 4. TTS Integration and Echo Prevention | 0/? | Not started | - |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |
 
@@ -165,4 +169,4 @@ Plans:
 
 ---
 *Created: 2026-03-20*
-*Last updated: 2026-03-21 after Phase 2 planning*
+*Last updated: 2026-03-21 after Phase 3 planning*
