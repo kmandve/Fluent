@@ -22,7 +22,7 @@ import sys
 from audio.bt_setup import check_bt_status, connect_device, print_pairing_instructions
 from audio.daf_engine import start_daf
 from audio.device_utils import find_bt_device, list_all_devices
-from config import DEVICE_NAME_HINT
+from config import DEVICE_NAME_HINT, VAD_RMS_THRESHOLD
 
 
 def parse_args() -> argparse.Namespace:
@@ -79,6 +79,17 @@ Examples:
         help=(
             "Force a specific sounddevice device index instead of auto-detection. "
             "Use --list-devices to find the correct index."
+        ),
+    )
+    parser.add_argument(
+        "--vad-threshold",
+        metavar="RMS",
+        type=float,
+        default=None,
+        help=(
+            f"Override VAD speech detection threshold (RMS energy). "
+            f"Lower = more sensitive. Default: {VAD_RMS_THRESHOLD}. "
+            "Set to 0 to disable VAD (always-on DAF)."
         ),
     )
     return parser.parse_args()
@@ -158,7 +169,9 @@ def main() -> None:
     print()
     if args.delay:
         print(f"[main] DAF delay override: {args.delay}ms")
-    start_daf(device_index=device_idx, delay_ms=args.delay)
+    if args.vad_threshold is not None:
+        print(f"[main] VAD threshold override: {args.vad_threshold}")
+    start_daf(device_index=device_idx, delay_ms=args.delay, vad_threshold=args.vad_threshold)
 
 
 if __name__ == "__main__":
