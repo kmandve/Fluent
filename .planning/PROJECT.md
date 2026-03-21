@@ -15,10 +15,10 @@ When a person stutters and gets blocked on a word, the app instantly predicts an
 - ✓ Real-time speech capture via browser microphone — Phase 1
 - ✓ Live transcription of speech context to inform predictions — Phase 1
 - ✓ Detection of all three stutter types: repetitions, prolongations, and silent blocks — Phase 2
+- ✓ Word prediction using context + partial sound (hybrid: local-first, LLM fallback) — Phase 3
+- ✓ Sub-500ms response from block detection to spoken word — Phase 3
 
 ### Active
-- [ ] Word prediction using context + partial sound (hybrid: local-first, LLM fallback)
-- [ ] Sub-500ms response from block detection to spoken word
 - [ ] Text-to-speech output of predicted word (browser TTS — free, functional)
 - [ ] Audio output via speaker or earbud (user's choice based on device)
 - [ ] Minimal UI: start/stop button, live transcript, predicted words highlighted
@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-21 after Phase 2 completion*
+*Last updated: 2026-03-21 after Phase 3 completion*
