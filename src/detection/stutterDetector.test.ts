@@ -200,9 +200,10 @@ describe('createStutterDetector', () => {
       const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
       detector.tick(0.005, interimText, confirmedAt);
 
-      // Tick after cooldown expires
+      // Tick after cooldown expires — use NEW interimText to clear prolongation stall
       const afterCooldown = confirmedAt + COOLDOWN_MS + 10;
-      detector.tick(0.1, interimText, afterCooldown);
+      const newInterimText = 'I want to say something';
+      detector.tick(0.1, newInterimText, afterCooldown);
 
       expect(detector.getState()).toBe('FLUENT');
     });
@@ -239,8 +240,10 @@ describe('createStutterDetector', () => {
       // Prime the lastInterimText and lastInterimChangeMs
       detector.tick(0.05, interimText, BASE_NOW);
 
-      // Same text, same energy, stalled for 600ms (above PROLONGATION_STALL_MS=400)
-      const event = detector.tick(0.05, interimText, BASE_NOW + 600);
+      // Same text, same energy, stalled for 1500ms (well above PROLONGATION_STALL_MS=400)
+      // At 600ms: confidence = 0.60 + (600/1000)*0.1 = 0.66 < 0.72 (not enough)
+      // At 1500ms: confidence = 0.60 + (1500/1000)*0.1 = 0.75 >= 0.72
+      const event = detector.tick(0.05, interimText, BASE_NOW + 1500);
 
       expect(event).not.toBeNull();
       expect(event?.type).toBe('prolongation');
@@ -282,10 +285,14 @@ describe('createStutterDetector', () => {
       const interimText = 'I want to say';
 
       // With threshold=0.1, energy=0.05 should be below threshold -> can detect block
+      // Use more time margin to ensure confidence >= 0.72
+      // confidence = 0.60 + (silenceDurationMs/2000)*0.2 + (1 - 0.05/0.1)*0.15
+      //            = 0.60 + (silenceDurationMs/2000)*0.2 + 0.075
+      // Need: 0.675 + (silenceDurationMs/2000)*0.2 >= 0.72 -> silenceDurationMs >= 450
       detector.tick(0.1, interimText, BASE_NOW);
       const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.05, interimText, stalledAt);
-      const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
+      const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 100; // 500ms silence > 450ms needed
       const event = detector.tick(0.05, interimText, confirmedAt);
 
       expect(event).not.toBeNull();
