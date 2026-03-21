@@ -12,7 +12,7 @@
 - [x] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track (completed 2026-03-21)
 - [x] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating (completed 2026-03-21)
 - [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; OpenAI LLM fallback fires async within 200ms budget
-- [ ] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic
+- [x] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic (completed 2026-03-21)
 - [ ] **Phase 5: UI Polish and Demo Hardening** - Judge-ready live demo with visual feedback, error states, and a verified demo checklist
 
 ---
@@ -102,11 +102,11 @@ Plans:
   3. If two stutter events fire in quick succession, only the most recent prediction is spoken — no backlog or overlapping TTS
   4. The predicted word is simultaneously highlighted in the live transcript when TTS fires
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
-- [ ] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
+- [x] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
 
 ---
 
@@ -135,7 +135,7 @@ Plans:
 | 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
 | 2. Stutter Detection Engine | 3/3 | Complete   | 2026-03-21 |
 | 3. Prediction Pipeline | 1/2 | In Progress|  |
-| 4. TTS Integration and Echo Prevention | 1/2 | In Progress|  |
+| 4. TTS Integration and Echo Prevention | 2/2 | Complete   | 2026-03-21 |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |
 
 ---

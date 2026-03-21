@@ -39,8 +39,8 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 ### Output
 
 - [x] **OUT-01**: App speaks predicted word aloud via browser SpeechSynthesis
-- [ ] **OUT-02**: Predicted word is visually highlighted in the transcript
-- [ ] **OUT-03**: TTS output does not loop back into microphone (echo prevention)
+- [x] **OUT-02**: Predicted word is visually highlighted in the transcript
+- [x] **OUT-03**: TTS output does not loop back into microphone (echo prevention)
 - [x] **OUT-04**: Audio output works via speaker or earbud (user's device choice)
 
 ### UI
@@ -107,8 +107,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRED-04 | Phase 3 | Complete |
 | PRED-05 | Phase 3 | Complete |
 | OUT-01 | Phase 4 | Complete |
-| OUT-02 | Phase 4 | Pending |
-| OUT-03 | Phase 4 | Pending |
+| OUT-02 | Phase 4 | Complete |
+| OUT-03 | Phase 4 | Complete |
 | OUT-04 | Phase 4 | Complete |
 | UI-01 | Phase 5 | Pending |
 | UI-02 | Phase 5 | Pending |
