@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-21T05:22:28.528Z"
+last_updated: "2026-03-21T05:26:52.976Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # State: Fluent
@@ -22,7 +22,7 @@ progress:
 ## Current Position
 
 Phase: 01 (audio-pipeline-foundation) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Plan: 2 of 3
 
 ---
 | Phase 01 P01 | 3 | 2 tasks | 10 files |
+| Phase 01 P02 | 135 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -44,6 +45,9 @@ Plan: 2 of 3
 | Decision | Rationale | Phase |
 |----------|-----------|-------|
 | Chrome-only for demo | Web Speech API unsupported in Firefox/Safari | Pre-phase |
+| getUserMedia called first in captureManager.start() | Single mic permission covers both SpeechRecognition + AudioContext tracks — avoids double prompt | Phase 01 |
+| MAX_RESTART_ATTEMPTS=10 with reset on onresult | Caps restart storm in noisy venues; resets on successful speech to allow normal silence restarts indefinitely | Phase 01 |
+| onerror no-speech ignored in captureManager | onend handler already handles restart; ignoring prevents double-restart race | Phase 01 |
 | Dual-track audio (Speech API + AudioWorklet) | Silent blocks are invisible to Speech API alone — acoustic track is non-optional | Pre-phase |
 | Local n-gram model as primary prediction path | LLM alone cannot fit inside 500ms budget; local fires in <5ms | Pre-phase |
 | Groq llama-3.1-8b-instant as LLM fallback | Sub-200ms TTFT on LPU hardware; free tier sufficient for demo | Pre-phase |
@@ -83,7 +87,7 @@ None currently.
 
 ## Session Continuity
 
-**Last session:** 2026-03-21T05:22:28.526Z
+**Last session:** 2026-03-21T05:26:52.974Z
 **Next action:** Begin Phase 1 planning with `/gsd:plan-phase 1`
 
 **Context for next session:**

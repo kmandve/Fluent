@@ -9,16 +9,16 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 
 ### Audio Pipeline
 
-- [ ] **AUDIO-01**: User can grant microphone permission via browser prompt
-- [ ] **AUDIO-02**: App captures continuous audio from browser microphone
+- [x] **AUDIO-01**: User can grant microphone permission via browser prompt
+- [x] **AUDIO-02**: App captures continuous audio from browser microphone
 - [x] **AUDIO-03**: User can start and stop listening with a single button
 - [x] **AUDIO-04**: App works in Chrome browser with no installation required
 
 ### Speech Transcription
 
-- [ ] **TRANS-01**: App displays live transcription of user's speech on screen
-- [ ] **TRANS-02**: Transcription updates in real time using interim results (not just final)
-- [ ] **TRANS-03**: Web Speech API auto-restarts after silence periods (no silent death)
+- [x] **TRANS-01**: App displays live transcription of user's speech on screen
+- [x] **TRANS-02**: Transcription updates in real time using interim results (not just final)
+- [x] **TRANS-03**: Web Speech API auto-restarts after silence periods (no silent death)
 
 ### Stutter Detection
 
@@ -89,13 +89,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIO-01 | Phase 1 | Pending |
-| AUDIO-02 | Phase 1 | Pending |
+| AUDIO-01 | Phase 1 | Complete |
+| AUDIO-02 | Phase 1 | Complete |
 | AUDIO-03 | Phase 1 | Complete |
 | AUDIO-04 | Phase 1 | Complete |
-| TRANS-01 | Phase 1 | Pending |
-| TRANS-02 | Phase 1 | Pending |
-| TRANS-03 | Phase 1 | Pending |
+| TRANS-01 | Phase 1 | Complete |
+| TRANS-02 | Phase 1 | Complete |
+| TRANS-03 | Phase 1 | Complete |
 | STUT-01 | Phase 2 | Pending |
 | STUT-02 | Phase 2 | Pending |
 | STUT-03 | Phase 2 | Pending |
