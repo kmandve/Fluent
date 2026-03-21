@@ -5,11 +5,11 @@ import { useSessionStore } from '../store/sessionStore';
 
 // ─── Threshold Constants ──────────────────────────────────────────────────────
 
-export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.01;
-export const BLOCK_CONFIRM_MS = 800;
-export const TRANSCRIPT_STALL_MS = 500;
-export const CONFIDENCE_THRESHOLD = 0.78;
-export const COOLDOWN_MS = 2500;
+export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.012;
+export const BLOCK_CONFIRM_MS = 600;
+export const TRANSCRIPT_STALL_MS = 350;
+export const CONFIDENCE_THRESHOLD = 0.75;
+export const COOLDOWN_MS = 2000;
 export const CALIBRATION_DURATION_MS = 2500;
 export const CALIBRATION_SAMPLE_INTERVAL_MS = 100;
 
