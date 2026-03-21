@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: "Phase 06 Plan 01 — paused at checkpoint:human-verify (Task 2: run setup.sh on Pi)"
-last_updated: "2026-03-21T20:34:19.172Z"
+status: executing
+stopped_at: "Phase 06 Plan 01 — complete (Task 2 skipped: Pi deployment deferred, building on Mac first)"
+last_updated: "2026-03-21T21:00:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # State: Fluent
@@ -23,7 +23,7 @@ progress:
 ## Current Position
 
 Phase: 06 (raspberry-pi-audio-setup) — EXECUTING
-Plan: 1 of 2
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Plan: 1 of 2
 | Phase 03 P02 | 2 | 2 tasks | 8 files |
 | Phase 04 P01 | 188 | 2 tasks | 5 files |
 | Phase 04 P02 | 15 | 1 tasks | 6 files |
-| Phase 06 P01 | 5 | 1 tasks | 5 files |
+| Phase 06 P01 | 5 | 1 tasks | 5 files (Task 2 skipped — Pi deferred) |
 
 ## Accumulated Context
 
@@ -67,6 +67,7 @@ Plan: 1 of 2
 | Energy console log throttled at 500ms via ref-based timer | Prevents console flood during active listening without losing visibility | Phase 01 |
 | ErrorOverlay: modal for mic-denied, top banner for unsupported | Distinct UX signals — modal is dismissible, banner is persistent informational | Phase 01 |
 | ControlBar: single toggle button (green=start, red=stop) | Simpler than separate buttons; pulsing dot provides additional state signal | Phase 01 |
+| Pi hardware verification skipped — Mac-first development | User building and testing DAF engine on Mac; Pi deployment deferred to later session | Phase 06 |
 
 ### Critical Risks
 
@@ -108,17 +109,16 @@ None currently.
 
 ## Session Continuity
 
-**Last session:** 2026-03-21T20:34:17.370Z
-**Stopped at:** Phase 06 Plan 01 — paused at checkpoint:human-verify (Task 2: run setup.sh on Pi)
-**Next action:** Begin Phase 2 planning with `/gsd:plan-phase 2`
+**Last session:** 2026-03-21T21:00:00.000Z
+**Stopped at:** Phase 06 Plan 01 — complete (Task 2 skipped by user decision, Pi deployment deferred)
+**Next action:** Execute Phase 06 Plan 02 (DAF engine + BT pairing) on Mac first
 
 **Context for next session:**
 
-- Phase 1 complete: live audio pipeline working in Chrome with rolling transcript and energy track
-- Phase 2 (Stutter Detection Engine) consumes energyLevel from sessionStore and transcript entries
-- Silent block detection (STUT-01) is the primary demo feature — must nail block detection before repetitions/prolongations
-- Latency budget (500ms end-to-end) is the make-or-break metric — instrumented in Phase 3
-- AudioWorklet is running and providing RMS energy values — Phase 2 can use these directly
+- Phase 06 Plan 01 complete: pi-daf/ scaffold created with setup.sh, config.py, audio/device_utils.py
+- User chose Mac-first approach: build and test DAF engine on Mac, deploy to Pi later
+- Pi setup.sh is ready and can be run on Pi hardware when available
+- Phase 06 Plan 02 (BT pairing helper, DAF engine, main.py) should be developed Mac-first then verified on Pi
 
 ---
 *State initialized: 2026-03-20*

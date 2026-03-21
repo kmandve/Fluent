@@ -24,6 +24,7 @@ decisions:
   - "sounddevice over PyAudio — cleaner callback API maps directly to DAF ring buffer pattern"
   - "loginctl enable-linger required — headless Pi user services die at SSH logout without it"
   - "DELAY_MS=50 chosen — PMC research supports 50-75ms as therapeutic sweet spot for stuttering"
+  - "Pi hardware verification skipped — user building on Mac first, Pi deployment deferred to later session"
 metrics:
   duration_minutes: 5
   completed_date: "2026-03-21"
@@ -64,11 +65,9 @@ DAF constants: `SAMPLE_RATE=8000`, `CHANNELS=1`, `BLOCK_SIZE=256`, `DELAY_MS=50`
 - `list_all_devices()` — formatted table of all devices with channel counts and sample rate
 - `if __name__ == "__main__"` block for `python3 -m audio.device_utils` diagnostic use
 
-## Checkpoint Status
+## Plan Status
 
-Task 2 is a `checkpoint:human-verify` — the user must SSH into the Pi and run `setup.sh`, then verify PipeWire services are running. This plan is paused at that checkpoint.
-
-See checkpoint details below.
+Task 2 (`checkpoint:human-verify` — run setup.sh on Pi) was skipped by explicit user decision. The user chose to build and test the DAF engine on Mac first and deploy to Pi later. The scaffold is complete and ready for Pi deployment whenever needed.
 
 ## Deviations from Plan
 
