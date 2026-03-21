@@ -37,17 +37,33 @@ export function createSpeechOutput(): SpeechOutput {
     utterance.volume = 0.75;
     utterance.lang = 'en-US';
 
-    utterance.onend = () => {
+    let endCalled = false;
+    const safeOnEnd = () => {
+      if (endCalled) return;
+      endCalled = true;
       onEnd?.();
+    };
+
+    utterance.onend = () => {
+      safeOnEnd();
     };
 
     utterance.onerror = (e: SpeechSynthesisErrorEvent) => {
       if (e.error !== 'interrupted') {
         console.warn('[SpeechOutput] TTS error:', e.error);
-        onEnd?.();
+        safeOnEnd();
       }
       // 'interrupted' errors are expected from cancel() — do NOT call onEnd
     };
+
+    // Safety net: Chrome sometimes doesn't fire onend for short utterances.
+    // Always resume recognition after 3 seconds max, even if onend never fires.
+    setTimeout(() => {
+      if (!endCalled) {
+        console.warn('[SpeechOutput] Safety net: onend did not fire within 3s, forcing callback');
+        safeOnEnd();
+      }
+    }, 3000);
 
     window.speechSynthesis.speak(utterance);
   }
