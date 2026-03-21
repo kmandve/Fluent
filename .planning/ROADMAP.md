@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track
+- [x] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track (completed 2026-03-21)
 - [ ] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating
 - [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; Groq LLM fallback fires async within 200ms budget
 - [ ] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic
@@ -33,12 +33,12 @@
   3. Deliberately holding silence for 5 seconds does not kill the transcript — the app auto-restarts recognition invisibly and resumes capturing on next speech
   4. The Web Audio API energy track is computing RMS values in parallel — confirmed via console output or a debug energy readout before UI phase
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Scaffold project (Vite 8 + React 19 + Tailwind 4), Zustand store, browser compat, Vitest setup
 - [x] 01-02-PLAN.md — Dual-track audio pipeline (captureManager + acousticAnalyzer + useAudioPipeline hook)
-- [ ] 01-03-PLAN.md — UI components (TranscriptDisplay, ControlBar, ErrorOverlay, App) + live verification
+- [x] 01-03-PLAN.md — UI components (TranscriptDisplay, ControlBar, ErrorOverlay, App) + live verification
 
 ---
 
@@ -119,7 +119,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Audio Pipeline Foundation | 2/3 | In Progress|  |
+| 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
 | 2. Stutter Detection Engine | 0/? | Not started | - |
 | 3. Prediction Pipeline | 0/? | Not started | - |
 | 4. TTS Integration and Echo Prevention | 0/? | Not started | - |
