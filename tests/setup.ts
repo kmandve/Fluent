@@ -31,7 +31,7 @@ class MockAudioContext {
   close() { return Promise.resolve(); }
 }
 
-Object.defineProperty(globalThis, 'SpeechRecognition', { value: MockSpeechRecognition, writable: true });
-Object.defineProperty(globalThis, 'webkitSpeechRecognition', { value: MockSpeechRecognition, writable: true });
-Object.defineProperty(globalThis, 'AudioContext', { value: MockAudioContext, writable: true });
-Object.defineProperty(globalThis, 'webkitAudioContext', { value: MockAudioContext, writable: true });
+Object.defineProperty(globalThis, 'SpeechRecognition', { value: MockSpeechRecognition, writable: true, configurable: true });
+Object.defineProperty(globalThis, 'webkitSpeechRecognition', { value: MockSpeechRecognition, writable: true, configurable: true });
+Object.defineProperty(globalThis, 'AudioContext', { value: MockAudioContext, writable: true, configurable: true });
+Object.defineProperty(globalThis, 'webkitAudioContext', { value: MockAudioContext, writable: true, configurable: true });
