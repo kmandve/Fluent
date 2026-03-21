@@ -21,6 +21,18 @@ export function createCaptureManager(): CaptureManager {
   let restartAttempts = 0;
   let mediaStream: MediaStream | null = null;
 
+  recognition.onstart = () => {
+    console.debug('[captureManager] SpeechRecognition started');
+  };
+
+  recognition.onaudiostart = () => {
+    console.debug('[captureManager] Audio capture started');
+  };
+
+  recognition.onspeechstart = () => {
+    console.debug('[captureManager] Speech detected');
+  };
+
   recognition.onresult = (event: SpeechRecognitionEvent) => {
     // Reset restart counter on successful speech detection
     restartAttempts = 0;
@@ -38,6 +50,8 @@ export function createCaptureManager(): CaptureManager {
       }
     }
 
+    console.debug('[captureManager] result:', { finalTranscript, interimTranscript });
+
     if (finalTranscript) {
       useSessionStore.getState().addFinalTranscript(finalTranscript);
     }
@@ -45,6 +59,7 @@ export function createCaptureManager(): CaptureManager {
   };
 
   recognition.onend = () => {
+    console.debug('[captureManager] SpeechRecognition ended, isListening:', isListening, 'restartAttempts:', restartAttempts);
     if (isListening && restartAttempts < MAX_RESTART_ATTEMPTS) {
       restartAttempts++;
       setTimeout(() => {
@@ -58,6 +73,7 @@ export function createCaptureManager(): CaptureManager {
   };
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    console.warn('[captureManager] SpeechRecognition error:', event.error, event.message);
     if (event.error === 'no-speech') {
       // Chrome sends this before onend; onend handler will restart
       return;
@@ -66,28 +82,41 @@ export function createCaptureManager(): CaptureManager {
       isListening = false;
       useSessionStore.getState().setErrorState('mic-denied');
     }
+    if (event.error === 'audio-capture') {
+      console.error('[captureManager] Audio capture failed — mic may be locked by another process');
+    }
+    if (event.error === 'network') {
+      console.error('[captureManager] Network error — Chrome Web Speech API requires internet');
+    }
   };
 
   async function start(): Promise<MediaStream | null> {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true },
-      });
-      mediaStream = stream;
+      // Start recognition first — it opens its own internal mic channel
       isListening = true;
       restartAttempts = 0;
 
       try {
         recognition.start();
+        console.debug('[captureManager] recognition.start() called');
       } catch (_e) {
-        // Ignore start errors (already started)
+        console.warn('[captureManager] recognition.start() threw:', _e);
       }
+
+      // Then get getUserMedia stream for the acoustic energy track
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
+      mediaStream = stream;
+      console.debug('[captureManager] getUserMedia stream obtained');
 
       return stream;
     } catch (err) {
+      isListening = false;
       if (err instanceof DOMException && err.name === 'NotAllowedError') {
         useSessionStore.getState().setErrorState('mic-denied');
       }
+      console.error('[captureManager] start failed:', err);
       return null;
     }
   }
