@@ -6,6 +6,8 @@ export interface CaptureManager {
   start: () => Promise<MediaStream | null>;
   stop: () => void;
   isActive: () => boolean;
+  pauseRecognition: () => void;
+  resumeRecognition: () => void;
 }
 
 export function createCaptureManager(): CaptureManager {
@@ -20,6 +22,7 @@ export function createCaptureManager(): CaptureManager {
   let isListening = false;
   let restartAttempts = 0;
   let mediaStream: MediaStream | null = null;
+  let recognitionPaused = false;
 
   recognition.onstart = () => {
     console.debug('[captureManager] SpeechRecognition started');
@@ -59,8 +62,8 @@ export function createCaptureManager(): CaptureManager {
   };
 
   recognition.onend = () => {
-    console.debug('[captureManager] SpeechRecognition ended, isListening:', isListening, 'restartAttempts:', restartAttempts);
-    if (isListening && restartAttempts < MAX_RESTART_ATTEMPTS) {
+    console.debug('[captureManager] SpeechRecognition ended, isListening:', isListening, 'paused:', recognitionPaused);
+    if (isListening && !recognitionPaused && restartAttempts < MAX_RESTART_ATTEMPTS) {
       restartAttempts++;
       setTimeout(() => {
         try {
@@ -132,5 +135,24 @@ export function createCaptureManager(): CaptureManager {
     return isListening;
   }
 
-  return { start, stop, isActive };
+  function pauseRecognition(): void {
+    if (recognitionPaused) return; // Already paused — no-op
+    recognitionPaused = true;
+    recognition.stop(); // Stop recognition only — mediaStream stays alive
+    console.debug('[captureManager] Recognition paused (MediaStream still active)');
+  }
+
+  function resumeRecognition(): void {
+    if (!recognitionPaused) return; // Not paused — no-op
+    recognitionPaused = false;
+    restartAttempts = 0;
+    try {
+      recognition.start();
+      console.debug('[captureManager] Recognition resumed');
+    } catch (_e) {
+      console.warn('[captureManager] Recognition resume threw:', _e);
+    }
+  }
+
+  return { start, stop, isActive, pauseRecognition, resumeRecognition };
 }
