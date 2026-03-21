@@ -177,11 +177,11 @@ Plans:
 
 **Requirements**: HW-01, HW-02, HW-03, HW-04, HW-05
 **Depends on:** Phase 5
-**Plans:** 1/2 plans complete (Plan 02 pending)
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — Pi setup script (PipeWire + WirePlumber + HFP config), project scaffold (config.py, device_utils.py) — Pi hardware verification deferred; Mac-first development approach
-- [ ] 06-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point, end-to-end audio verification
+- [x] 06-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point, end-to-end audio verification
 
 ### Phase 7: Bluetooth Headphone Connection — Pair and connect Bluetooth wireless headphones to Raspberry Pi, configure as audio output sink with low-latency A2DP profile
 

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: "Phase 06 Plan 01 — complete (Task 2 skipped: Pi deployment deferred, building on Mac first)"
-last_updated: "2026-03-21T21:00:00.000Z"
+status: unknown
+stopped_at: "Phase 06 Plan 02 — checkpoint:human-verify (Task 1 complete, awaiting Mac/Pi audio test)"
+last_updated: "2026-03-21T20:47:52.247Z"
 progress:
   total_phases: 10
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
   completed_plans: 11
 ---
@@ -47,6 +47,7 @@ Plan: 2 of 2
 | Phase 04 P01 | 188 | 2 tasks | 5 files |
 | Phase 04 P02 | 15 | 1 tasks | 6 files |
 | Phase 06 P01 | 5 | 1 tasks | 5 files (Task 2 skipped — Pi deferred) |
+| Phase 06 P02 | 131 | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Plan: 2 of 2
 | ErrorOverlay: modal for mic-denied, top banner for unsupported | Distinct UX signals — modal is dismissible, banner is persistent informational | Phase 01 |
 | ControlBar: single toggle button (green=start, red=stop) | Simpler than separate buttons; pulsing dot provides additional state signal | Phase 01 |
 | Pi hardware verification skipped — Mac-first development | User building and testing DAF engine on Mac; Pi deployment deferred to later session | Phase 06 |
+| Mac-first SAMPLE_RATE: platform auto-detect in config.py | 44100 Hz on Darwin (Mac default device); 8000 Hz on Linux (Pi HFP CVSD) — no manual switching needed | Phase 06 |
+| bt_setup.py Linux-only with _is_linux() guard | bluetoothctl is Linux-only; returns no-op on Mac with clear message instead of FileNotFoundError | Phase 06 |
+| main.py Mac fallback: None device when no BT match found | Mac has no "bluez" device; gracefully falls back to system default so DAF can be tested on Mac hardware | Phase 06 |
 
 ### Critical Risks
 
@@ -109,8 +113,8 @@ None currently.
 
 ## Session Continuity
 
-**Last session:** 2026-03-21T21:00:00.000Z
-**Stopped at:** Phase 06 Plan 01 — complete (Task 2 skipped by user decision, Pi deployment deferred)
+**Last session:** 2026-03-21T20:47:40.679Z
+**Stopped at:** Phase 06 Plan 02 — checkpoint:human-verify (Task 1 complete, awaiting Mac/Pi audio test)
 **Next action:** Execute Phase 06 Plan 02 (DAF engine + BT pairing) on Mac first
 
 **Context for next session:**
