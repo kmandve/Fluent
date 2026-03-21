@@ -66,6 +66,18 @@ export function App() {
 
         {/* Detection log panel — only visible during active session */}
         <DetectionLog />
+
+        {/* TTS test button */}
+        <button
+          onClick={() => {
+            const u = new SpeechSynthesisUtterance('hello');
+            u.volume = 1;
+            speechSynthesis.speak(u);
+          }}
+          className="mt-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-400 transition-colors"
+        >
+          Test Speaker
+        </button>
       </div>
       <ErrorOverlay />
     </div>

@@ -17,4 +17,6 @@ export interface DetectorContext {
   lastInterimText: string;
   lastInterimChangeMs: number;
   cooldownUntilMs: number;
+  speechStartMs: number | null;
+  wordCount: number;
 }

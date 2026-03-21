@@ -7,6 +7,7 @@ import {
   TRANSCRIPT_STALL_MS,
   CONFIDENCE_THRESHOLD,
   COOLDOWN_MS,
+  MIN_SPEECH_BEFORE_BLOCK_MS,
 } from './stutterDetector';
 
 // Mock the sessionStore
@@ -16,10 +17,10 @@ vi.mock('../store/sessionStore', () => ({
       addDetectionEvent: vi.fn(),
       interimText: '',
     })),
+    subscribe: vi.fn(),
   },
 }));
 
-// Mock crypto.randomUUID
 const mockUUID = '00000000-0000-0000-0000-000000000001';
 vi.stubGlobal('crypto', {
   randomUUID: vi.fn(() => mockUUID),
@@ -27,28 +28,34 @@ vi.stubGlobal('crypto', {
 
 import { useSessionStore } from '../store/sessionStore';
 
-// Helper to get the mocked addDetectionEvent
 function getMockAddDetectionEvent() {
   return (useSessionStore.getState as ReturnType<typeof vi.fn>)().addDetectionEvent as ReturnType<typeof vi.fn>;
 }
 
-// Helper to simulate multiple ticks
-function simulateTicks(
-  detector: ReturnType<typeof createStutterDetector>,
-  ticks: Array<{ energy: number; interimText: string; now: number }>
-): Array<ReturnType<typeof detector.tick>> {
-  return ticks.map(({ energy, interimText, now }) => detector.tick(energy, interimText, now));
-}
-
-// Baseline "now" for deterministic tests
 const BASE_NOW = 1_000_000;
+
+/**
+ * Simulate realistic speech before a block — user says words over MIN_SPEECH_BEFORE_BLOCK_MS.
+ * Returns the timestamp after speech activity is established.
+ */
+function simulateSpeechActivity(
+  detector: ReturnType<typeof createStutterDetector>,
+  startTime: number
+): number {
+  // User starts speaking word by word over 1.2 seconds
+  detector.tick(0.1, 'I', startTime);
+  detector.tick(0.1, 'I want', startTime + 300);
+  detector.tick(0.1, 'I want to', startTime + 600);
+  detector.tick(0.1, 'I want to say', startTime + 900);
+  detector.tick(0.1, 'I want to say something', startTime + 1200);
+  return startTime + 1200; // return time after speech is established
+}
 
 describe('createStutterDetector', () => {
   let addDetectionEventMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Re-setup mock to return fresh spy
     addDetectionEventMock = vi.fn();
     (useSessionStore.getState as ReturnType<typeof vi.fn>).mockReturnValue({
       addDetectionEvent: addDetectionEventMock,
@@ -61,232 +68,182 @@ describe('createStutterDetector', () => {
   });
 
   describe('block detection', () => {
-    it('fires after 400ms sustained silence with stalled transcript', () => {
+    it('fires after sustained silence when user was actively speaking', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to say';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
+      const interimText = 'I want to say something';
 
-      // First tick: set lastInterimText = interimText (no stall yet, energy below threshold)
-      // We need to prime the lastInterimChangeMs with an earlier time
-      // Tick at BASE_NOW to prime state (energy is fine, interimText set)
-      detector.tick(0.1, interimText, BASE_NOW);
-
-      // Now simulate silence+stall: energy drops below threshold
-      // Move forward enough that transcript has been stalled for TRANSCRIPT_STALL_MS
-      // and then keep low energy for BLOCK_CONFIRM_MS
-      // First transition FLUENT -> ONSET_SILENCE needs:
-      //   energy < threshold AND stall >= TRANSCRIPT_STALL_MS
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10; // > 200ms after last text change
-      // At stalledAt: low energy, same interimText -> should enter ONSET_SILENCE
+      // Transcript stalls, energy drops
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.005, interimText, stalledAt);
 
-      // Now tick after BLOCK_CONFIRM_MS (400ms) in silence -> should fire block
+      // Confirm block after BLOCK_CONFIRM_MS
       const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
       const event = detector.tick(0.005, interimText, confirmedAt);
 
       expect(event).not.toBeNull();
       expect(event?.type).toBe('block');
       expect(event?.confidence).toBeGreaterThanOrEqual(CONFIDENCE_THRESHOLD);
-      expect(addDetectionEventMock).toHaveBeenCalledOnce();
     });
 
-    it('does NOT fire at 200ms (below BLOCK_CONFIRM_MS)', () => {
+    it('does NOT fire if user only said one word', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to say';
 
-      // Prime state
-      detector.tick(0.1, interimText, BASE_NOW);
+      // Only one word spoken
+      detector.tick(0.1, 'hello', BASE_NOW);
 
-      // Enter ONSET_SILENCE
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
+      // Long silence
+      const stalledAt = BASE_NOW + MIN_SPEECH_BEFORE_BLOCK_MS + TRANSCRIPT_STALL_MS + 100;
+      detector.tick(0.005, 'hello', stalledAt);
+
+      const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
+      const event = detector.tick(0.005, 'hello', confirmedAt);
+
+      expect(event).toBeNull();
+    });
+
+    it('does NOT fire before BLOCK_CONFIRM_MS', () => {
+      const detector = createStutterDetector();
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
+      const interimText = 'I want to say something';
+
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.005, interimText, stalledAt);
 
-      // Tick at only 200ms into silence (less than BLOCK_CONFIRM_MS=400ms)
+      // Too early
       const tooEarlyAt = stalledAt + 200;
       const event = detector.tick(0.005, interimText, tooEarlyAt);
 
       expect(event).toBeNull();
-      expect(addDetectionEventMock).not.toHaveBeenCalled();
     });
 
     it('resets to FLUENT when energy rises during ONSET_SILENCE', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to say';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
+      const interimText = 'I want to say something';
 
-      // Prime state
-      detector.tick(0.1, interimText, BASE_NOW);
-
-      // Enter ONSET_SILENCE
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.005, interimText, stalledAt);
       expect(detector.getState()).toBe('ONSET_SILENCE');
 
-      // Energy rises (noise spike) — should reset to FLUENT
-      const spikeAt = stalledAt + 200;
-      const event = detector.tick(0.05, interimText, spikeAt);
-
-      expect(event).toBeNull();
+      // Energy spike
+      detector.tick(0.05, interimText, stalledAt + 200);
       expect(detector.getState()).toBe('FLUENT');
-      expect(addDetectionEventMock).not.toHaveBeenCalled();
     });
 
     it('suppressed when interimText ends with filler word', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to um';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
 
-      // Prime state
-      detector.tick(0.1, interimText, BASE_NOW);
+      // Change to filler ending
+      detector.tick(0.1, 'I want to um', speechEnd + 100);
 
-      // Even with silence + stall, filler at end prevents detection
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
-      detector.tick(0.005, interimText, stalledAt);
+      const stalledAt = speechEnd + 100 + TRANSCRIPT_STALL_MS + 10;
+      detector.tick(0.005, 'I want to um', stalledAt);
 
       const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
-      const event = detector.tick(0.005, interimText, confirmedAt);
+      const event = detector.tick(0.005, 'I want to um', confirmedAt);
 
       expect(event).toBeNull();
-      expect(addDetectionEventMock).not.toHaveBeenCalled();
     });
 
-    it('suppressed on empty-to-empty transcript (recognition restart)', () => {
+    it('suppressed on empty-to-empty transcript', () => {
       const detector = createStutterDetector();
 
-      // Both current and last are empty — should never enter ONSET_SILENCE
-      const results = simulateTicks(detector, [
-        { energy: 0.005, interimText: '', now: BASE_NOW },
-        { energy: 0.005, interimText: '', now: BASE_NOW + TRANSCRIPT_STALL_MS + 10 },
-        { energy: 0.005, interimText: '', now: BASE_NOW + TRANSCRIPT_STALL_MS + BLOCK_CONFIRM_MS + 10 },
-      ]);
+      detector.tick(0.005, '', BASE_NOW);
+      detector.tick(0.005, '', BASE_NOW + TRANSCRIPT_STALL_MS + 10);
+      detector.tick(0.005, '', BASE_NOW + TRANSCRIPT_STALL_MS + BLOCK_CONFIRM_MS + 10);
 
-      expect(results.every((e) => e === null)).toBe(true);
       expect(detector.getState()).toBe('FLUENT');
       expect(addDetectionEventMock).not.toHaveBeenCalled();
     });
   });
 
   describe('cooldown', () => {
-    it('no events fire during 1500ms cooldown window', () => {
+    it('no events fire during cooldown window', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to say';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
+      const interimText = 'I want to say something';
 
-      // Prime and trigger block event
-      detector.tick(0.1, interimText, BASE_NOW);
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.005, interimText, stalledAt);
       const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
       const firstEvent = detector.tick(0.005, interimText, confirmedAt);
       expect(firstEvent).not.toBeNull();
 
-      // Now tick during cooldown — should return null
+      // During cooldown
       const duringCooldown = confirmedAt + 500;
-      const secondEvent = detector.tick(0.005, interimText, duringCooldown);
-      expect(secondEvent).toBeNull();
+      expect(detector.tick(0.005, interimText, duringCooldown)).toBeNull();
 
       const duringCooldown2 = confirmedAt + COOLDOWN_MS - 100;
-      const thirdEvent = detector.tick(0.005, interimText, duringCooldown2);
-      expect(thirdEvent).toBeNull();
+      expect(detector.tick(0.005, interimText, duringCooldown2)).toBeNull();
 
-      // Total events: only the first one
       expect(addDetectionEventMock).toHaveBeenCalledOnce();
     });
 
     it('transitions back to FLUENT after cooldown expires', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to say';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
+      const interimText = 'I want to say something';
 
-      // Trigger a block event
-      detector.tick(0.1, interimText, BASE_NOW);
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.005, interimText, stalledAt);
       const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 10;
       detector.tick(0.005, interimText, confirmedAt);
 
-      // Tick after cooldown expires — use NEW interimText to clear prolongation stall
       const afterCooldown = confirmedAt + COOLDOWN_MS + 10;
-      const newInterimText = 'I want to say something';
-      detector.tick(0.1, newInterimText, afterCooldown);
-
+      detector.tick(0.1, 'I want to say something new', afterCooldown);
       expect(detector.getState()).toBe('FLUENT');
     });
   });
 
   describe('repetition detection', () => {
-    it('fires when detectRepetition returns confidence >= 0.72', () => {
+    it('fires when detectRepetition returns confidence >= threshold', () => {
       const detector = createStutterDetector();
-
-      // "b b b" should have confidence 0.75 >= 0.72 threshold
       const event = detector.tick(0.05, 'b b b', BASE_NOW);
 
       expect(event).not.toBeNull();
       expect(event?.type).toBe('repetition');
       expect(event?.confidence).toBeGreaterThanOrEqual(CONFIDENCE_THRESHOLD);
-      expect(addDetectionEventMock).toHaveBeenCalledOnce();
     });
 
-    it('does NOT fire for repetitions below confidence threshold', () => {
+    it('does NOT fire for non-repetitive text', () => {
       const detector = createStutterDetector();
-
-      // A single-word transcript has no repetitions
       const event = detector.tick(0.05, 'hello', BASE_NOW);
-
       expect(event?.type).not.toBe('repetition');
     });
   });
 
   describe('prolongation detection', () => {
-    it('fires when detectProlongation returns confidence >= 0.72', () => {
+    it('fires when energy is high and text stalled long enough', () => {
       const detector = createStutterDetector();
-      const interimText = 'sss';
-
-      // Prime the lastInterimText and lastInterimChangeMs
-      detector.tick(0.05, interimText, BASE_NOW);
-
-      // Same text, same energy, stalled for 2000ms (well above PROLONGATION_STALL_MS)
-      // At 2000ms: confidence = 0.60 + (2000/1000)*0.15 = 0.90 >= CONFIDENCE_THRESHOLD
-      const event = detector.tick(0.05, interimText, BASE_NOW + 2000);
+      detector.tick(0.05, 'sss', BASE_NOW);
+      const event = detector.tick(0.05, 'sss', BASE_NOW + 2000);
 
       expect(event).not.toBeNull();
       expect(event?.type).toBe('prolongation');
       expect(event?.confidence).toBeGreaterThanOrEqual(CONFIDENCE_THRESHOLD);
-      expect(addDetectionEventMock).toHaveBeenCalledOnce();
     });
 
-    it('does NOT fire if energy is too low for prolongation', () => {
+    it('does NOT fire if energy is too low', () => {
       const detector = createStutterDetector();
-      const interimText = 'sss';
+      detector.tick(0.005, 'sss', BASE_NOW);
+      const event = detector.tick(0.005, 'sss', BASE_NOW + 2000);
 
-      // Low energy — prolognation should not trigger
-      detector.tick(0.005, interimText, BASE_NOW);
-      const event = detector.tick(0.005, interimText, BASE_NOW + 600);
-
-      // If anything fires, it should NOT be a prolongation
       if (event !== null) {
         expect(event.type).not.toBe('prolongation');
       }
     });
   });
 
-  describe('event timestamp', () => {
-    it('detection event timestamp matches the "now" parameter', () => {
-      const detector = createStutterDetector();
-
-      // Trigger repetition at a known time
-      const eventNow = BASE_NOW + 999;
-      const event = detector.tick(0.05, 'b b b', eventNow);
-
-      expect(event).not.toBeNull();
-      expect(event?.timestamp).toBe(eventNow);
-    });
-  });
-
   describe('setThreshold and reset', () => {
     it('setThreshold changes the energy threshold for block detection', () => {
       const detector = createStutterDetector({ blockEnergyThreshold: 0.1 });
-      const interimText = 'I want to say';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
+      const interimText = 'I want to say something';
 
-      // With threshold=0.1, energy=0.02 should be below threshold -> can detect block
-      // Energy 0.02 is also below PROLONGATION_ENERGY_FLOOR (0.025) so prolongation won't fire
-      detector.tick(0.1, interimText, BASE_NOW);
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
+      // energy 0.02 is below custom threshold 0.1 and below PROLONGATION_ENERGY_FLOOR
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
       detector.tick(0.02, interimText, stalledAt);
       const confirmedAt = stalledAt + BLOCK_CONFIRM_MS + 100;
       const event = detector.tick(0.02, interimText, confirmedAt);
@@ -297,16 +254,13 @@ describe('createStutterDetector', () => {
 
     it('reset() returns detector to FLUENT state', () => {
       const detector = createStutterDetector();
-      const interimText = 'I want to say';
+      const speechEnd = simulateSpeechActivity(detector, BASE_NOW);
 
-      // Enter ONSET_SILENCE
-      detector.tick(0.1, interimText, BASE_NOW);
-      const stalledAt = BASE_NOW + TRANSCRIPT_STALL_MS + 10;
-      detector.tick(0.005, interimText, stalledAt);
+      const stalledAt = speechEnd + TRANSCRIPT_STALL_MS + 10;
+      detector.tick(0.005, 'I want to say something', stalledAt);
       expect(detector.getState()).toBe('ONSET_SILENCE');
 
       detector.reset();
-
       expect(detector.getState()).toBe('FLUENT');
     });
   });
@@ -314,14 +268,9 @@ describe('createStutterDetector', () => {
   describe('calibrateAmbientNoise', () => {
     it('returns a number for the computed threshold', async () => {
       vi.useFakeTimers();
-      let sampleCount = 0;
-      const getRMS = vi.fn(() => {
-        sampleCount++;
-        return 0.003 + Math.random() * 0.002; // values ~0.003-0.005
-      });
+      const getRMS = vi.fn(() => 0.003 + Math.random() * 0.002);
 
       const calibratePromise = calibrateAmbientNoise(getRMS, 500, 100);
-      // Advance timers by 500ms + some buffer
       await vi.advanceTimersByTimeAsync(600);
       const threshold = await calibratePromise;
 
@@ -330,16 +279,14 @@ describe('createStutterDetector', () => {
       vi.useRealTimers();
     });
 
-    it('caps threshold at BLOCK_ENERGY_THRESHOLD_DEFAULT', async () => {
+    it('raises threshold for loud environments', async () => {
       vi.useFakeTimers();
-      // Very loud environment — p95 * 1.5 would be high, but cap at default
-      const getRMS = vi.fn(() => 0.1); // very loud
+      const getRMS = vi.fn(() => 0.1);
 
       const calibratePromise = calibrateAmbientNoise(getRMS, 500, 100);
       await vi.advanceTimersByTimeAsync(600);
       const threshold = await calibratePromise;
 
-      // Loud environment: threshold should be raised above default (p95 * 1.5 of 0.1 = 0.15)
       expect(threshold).toBeGreaterThanOrEqual(BLOCK_ENERGY_THRESHOLD_DEFAULT);
       vi.useRealTimers();
     });

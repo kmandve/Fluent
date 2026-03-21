@@ -6,10 +6,11 @@ import { useSessionStore } from '../store/sessionStore';
 // ─── Threshold Constants ──────────────────────────────────────────────────────
 
 export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.02;
-export const BLOCK_CONFIRM_MS = 600;
-export const TRANSCRIPT_STALL_MS = 300;
+export const BLOCK_CONFIRM_MS = 1000;
+export const TRANSCRIPT_STALL_MS = 400;
 export const CONFIDENCE_THRESHOLD = 0.75;
-export const COOLDOWN_MS = 2000;
+export const COOLDOWN_MS = 3000;
+export const MIN_SPEECH_BEFORE_BLOCK_MS = 1000;
 export const CALIBRATION_DURATION_MS = 2500;
 export const CALIBRATION_SAMPLE_INTERVAL_MS = 100;
 
@@ -79,6 +80,8 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
     lastInterimText: '',
     lastInterimChangeMs: Date.now(),
     cooldownUntilMs: 0,
+    speechStartMs: null,
+    wordCount: 0,
   };
 
   // ─── helpers ────────────────────────────────────────────────────────────────
@@ -111,6 +114,21 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
     if (textChanged) {
       ctx.lastInterimText = interimText;
       ctx.lastInterimChangeMs = now;
+
+      // Track when user started speaking and how many words they've said
+      const currentWordCount = interimText.trim().split(/\s+/).filter(Boolean).length;
+      if (currentWordCount > ctx.wordCount) {
+        if (ctx.speechStartMs === null) {
+          ctx.speechStartMs = now;
+        }
+        ctx.wordCount = currentWordCount;
+      }
+    }
+
+    // Reset speech tracking when interim goes empty (sentence finalized)
+    if (interimText === '' && previousInterimText !== '') {
+      ctx.speechStartMs = null;
+      ctx.wordCount = 0;
     }
 
     // 2. Cooldown guard
@@ -198,11 +216,16 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
 
     switch (ctx.state) {
       case 'FLUENT': {
-        // Only enter ONSET_SILENCE if there was recent speech activity
-        // (lastInterimChangeMs was set at some point during this session)
-        const hadRecentSpeech = ctx.lastInterimChangeMs > 0;
+        // Only enter ONSET_SILENCE if:
+        // 1. User was actively speaking (at least MIN_SPEECH_BEFORE_BLOCK_MS of speech activity)
+        // 2. They said at least 2 words (single-word pauses are normal)
+        // 3. Transcript has stalled
+        // 4. Energy is low (actual silence, not just a thinking pause with breath)
+        const wasSpeaking = ctx.speechStartMs !== null &&
+          (now - ctx.speechStartMs) >= MIN_SPEECH_BEFORE_BLOCK_MS &&
+          ctx.wordCount >= 2;
         const transcriptStalled = now - ctx.lastInterimChangeMs > TRANSCRIPT_STALL_MS;
-        if (energyLevel < blockEnergyThreshold && transcriptStalled && hadRecentSpeech) {
+        if (energyLevel < blockEnergyThreshold && transcriptStalled && wasSpeaking) {
           ctx.state = 'ONSET_SILENCE';
           ctx.silenceStartMs = now;
         }
@@ -260,6 +283,8 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       ctx.lastInterimText = '';
       ctx.lastInterimChangeMs = Date.now();
       ctx.cooldownUntilMs = 0;
+      ctx.speechStartMs = null;
+      ctx.wordCount = 0;
     },
   };
 }
