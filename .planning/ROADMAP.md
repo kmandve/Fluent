@@ -10,7 +10,7 @@
 ## Phases
 
 - [x] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track (completed 2026-03-21)
-- [ ] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating
+- [x] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating (completed 2026-03-21)
 - [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; Groq LLM fallback fires async within 200ms budget
 - [ ] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic
 - [ ] **Phase 5: UI Polish and Demo Hardening** - Judge-ready live demo with visual feedback, error states, and a verified demo checklist
@@ -57,12 +57,12 @@ Plans:
   4. A fluent non-stuttering speaker saying "um" or pausing to think does NOT trigger any detection event — false positive rate is zero on a normal 30-second speech sample
   5. Each detection event carries a stutter type ("block", "repetition", "prolongation") and a confidence score >= 0.7
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 02-01-PLAN.md — Detection types, heuristic functions (repetition + prolongation), filler word blocklist, store extension
 - [x] 02-02-PLAN.md — FSM stutter detector with ambient calibration, integrated into audio pipeline 100ms tick
-- [ ] 02-03-PLAN.md — Detection log panel UI, transcript highlight feedback, end-to-end human verification
+- [x] 02-03-PLAN.md — Detection log panel UI, transcript highlight feedback, end-to-end human verification
 
 ---
 
@@ -125,7 +125,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
-| 2. Stutter Detection Engine | 2/3 | In Progress|  |
+| 2. Stutter Detection Engine | 3/3 | Complete   | 2026-03-21 |
 | 3. Prediction Pipeline | 0/? | Not started | - |
 | 4. TTS Integration and Echo Prevention | 0/? | Not started | - |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |
