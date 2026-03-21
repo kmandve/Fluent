@@ -3,18 +3,17 @@
 **Milestone:** HackVH 2026 — Live Demo
 **Granularity:** Standard
 **Coverage:** 24/24 v1 requirements mapped
-**Created:** 2026-03-20
+**Created:** 2005-03-20
 
 ---
 
 ## Phases
 
-- [x] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track (completed 2026-03-21)
-- [x] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating (completed 2026-03-21)
+- [x] **Phase 1: Audio Pipeline Foundation** - Mic capture running continuously with live transcript and parallel acoustic energy track (completed 2005-03-21)
+- [x] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating (completed 2005-03-21)
 - [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; OpenAI LLM fallback fires async within 200ms budget
-- [x] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic (completed 2026-03-21)
-- [ ] **Phase 5: UI Polish and Demo Hardening** - Judge-ready live demo with visual feedback, error states, and a verified demo checklist
-- [x] **Phase 6: Raspberry Pi Audio Setup** - DAF engine with ring buffer verified on Mac at 20ms delay; BT helper and Pi scaffold ready (completed 2026-03-21)
+- [x] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic (completed 2005-03-21)
+- [x] **Phase 5: Raspberry Pi Audio Setup** - DAF engine with ring buffer verified on Mac at 20ms delay; BT helper and Pi scaffold ready (completed 2005-03-21)
 
 ---
 
@@ -109,87 +108,17 @@ Plans:
 - [x] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
 - [x] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
 
----
+### Phase 6: Voice Activity Detection — Add VAD to auto-enable DAF when speech is detected and disable during silence, using webrtcvad or energy-based detection in Python
 
-### Phase 5: UI Polish and Demo Hardening
-
-**Goal**: The complete pipeline is wrapped in a judge-ready interface that makes the live demo unmistakable — the judge sees what the app detected, what it predicted, and that it responded in real time.
-
-**Depends on**: Phase 4
-
-**Requirements**: UI-01, UI-02, UI-03
-
-**Success Criteria** (what must be TRUE):
-  1. A judge watching the demo can clearly see: the live transcript, which word was predicted, and a visual indicator that the app is actively listening — all without any explanation from the presenter
-  2. Opening the app in Firefox or Safari shows a "Chrome required" message instead of a broken transcript
-  3. Clicking Start with the microphone permission denied shows a clear error state rather than a silent failure
-  4. The end-to-end demo works on the actual demo hardware with the actual demo browser — verified on day-of checklist
-
-**Plans**: TBD
-
----
-
-## Progress
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
-| 2. Stutter Detection Engine | 3/3 | Complete   | 2026-03-21 |
-| 3. Prediction Pipeline | 1/2 | In Progress|  |
-| 4. TTS Integration and Echo Prevention | 2/2 | Complete   | 2026-03-21 |
-| 5. UI Polish and Demo Hardening | 0/? | Not started | - |
-| 6. Raspberry Pi Audio Setup | 2/2 | Complete   | 2026-03-21 |
-| 7. Bluetooth Headphone Connection | 0/? | Not started | - |
-| 8. Conversation Detection (VAD) | 0/? | Not started | - |
-| 9. DAF Engine | 0/? | Not started | - |
-| 10. Integration and Demo Hardening | 0/? | Not started | - |
-
----
-
-## Coverage Map
-
-| Requirement | Phase |
-|-------------|-------|
-| AUDIO-01 | Phase 1 |
-| AUDIO-02 | Phase 1 |
-| AUDIO-03 | Phase 1 |
-| AUDIO-04 | Phase 1 |
-| TRANS-01 | Phase 1 |
-| TRANS-02 | Phase 1 |
-| TRANS-03 | Phase 1 |
-| STUT-01 | Phase 2 |
-| STUT-02 | Phase 2 |
-| STUT-03 | Phase 2 |
-| STUT-04 | Phase 2 |
-| STUT-05 | Phase 2 |
-| PRED-01 | Phase 3 |
-| PRED-02 | Phase 3 |
-| PRED-03 | Phase 3 |
-| PRED-04 | Phase 3 |
-| PRED-05 | Phase 3 |
-| OUT-01 | Phase 4 |
-| OUT-02 | Phase 4 |
-| OUT-03 | Phase 4 |
-| OUT-04 | Phase 4 |
-| UI-01 | Phase 5 |
-| UI-02 | Phase 5 |
-| UI-03 | Phase 5 |
-
-**Coverage: 24/24 v1 requirements mapped.**
-
-### Phase 6: Raspberry Pi Audio Setup (Complete — 2026-03-21)
-
-**Goal:** Install PipeWire + WirePlumber audio stack on Raspberry Pi OS Lite, configure HFP Bluetooth profile for Beat Buds headphones (mic + speaker), scaffold the pi-daf Python project, and verify bidirectional audio with delayed playback.
-
-**Requirements**: HW-01, HW-02, HW-03, HW-04, HW-05
+**Goal:** [To be planned]
+**Requirements**: TBD
 **Depends on:** Phase 5
-**Plans:** 2/2 plans complete
+**Plans:** 0 plans
 
 Plans:
-- [x] 06-01-PLAN.md — Pi setup script (PipeWire + WirePlumber + HFP config), project scaffold (config.py, device_utils.py) — Pi hardware verification deferred; Mac-first development approach
-- [x] 06-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point — DAF verified on Mac at 20ms delay; Pi BT verification deferred
+- [ ] TBD (run /gsd:plan-phase 6 to break down)
 
-### Phase 7: Bluetooth Headphone Connection — Pair and connect Bluetooth wireless headphones to Raspberry Pi, configure as audio output sink with low-latency A2DP profile
+### Phase 7: Pi Deployment and Demo Hardening — Deploy to Raspberry Pi, pair Bluetooth headphones, configure auto-start on boot, battery-powered portable demo ready
 
 **Goal:** [To be planned]
 **Requirements**: TBD
@@ -199,36 +128,16 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd:plan-phase 7 to break down)
 
-### Phase 8: Conversation Detection (VAD) — Detect when a conversation is happening using Voice Activity Detection so DAF only engages during active speech and disengages during silence
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 7
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 8 to break down)
-
-### Phase 9: DAF Engine — Implement Delayed Auditory Feedback with configurable 20ms delay, capture mic input and play back through Bluetooth headphones with precise low-latency audio loop
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 8
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 9 to break down)
-
-### Phase 10: Integration and Demo Hardening — Wire VAD to DAF toggle, test end-to-end on Raspberry Pi with Bluetooth headphones, auto-start on boot, portable demo-ready
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 9
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 10 to break down)
-
 ---
-*Created: 2026-03-20*
-*Last updated: 2026-03-21 after Phase 6 planning*
+
+### Phase 5: Raspberry Pi Audio Setup (Complete — 2005-03-21)
+
+**Goal:** Install PipeWire + WirePlumber audio stack on Raspberry Pi OS Lite, configure HFP Bluetooth profile for Beat Buds headphones (mic + speaker), scaffold the pi-daf Python project, and verify bidirectional audio with delayed playback.
+
+**Requirements**: HW-01, HW-02, HW-03, HW-04, HW-05
+**Depends on:** Phase 5
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 05-01-PLAN.md — Pi setup script (PipeWire + WirePlumber + HFP config), project scaffold (config.py, device_utils.py) — Pi hardware verification deferred; Mac-first development approach
+- [x] 05-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point — DAF verified on Mac at 20ms delay; Pi BT verification deferred
