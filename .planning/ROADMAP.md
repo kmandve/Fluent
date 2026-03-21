@@ -57,11 +57,11 @@ Plans:
   4. A fluent non-stuttering speaker saying "um" or pausing to think does NOT trigger any detection event — false positive rate is zero on a normal 30-second speech sample
   5. Each detection event carries a stutter type ("block", "repetition", "prolongation") and a confidence score >= 0.7
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 02-01-PLAN.md — Detection types, heuristic functions (repetition + prolongation), filler word blocklist, store extension
-- [ ] 02-02-PLAN.md — FSM stutter detector with ambient calibration, integrated into audio pipeline 100ms tick
+- [x] 02-02-PLAN.md — FSM stutter detector with ambient calibration, integrated into audio pipeline 100ms tick
 - [ ] 02-03-PLAN.md — Detection log panel UI, transcript highlight feedback, end-to-end human verification
 
 ---
@@ -125,7 +125,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
-| 2. Stutter Detection Engine | 1/3 | In Progress|  |
+| 2. Stutter Detection Engine | 2/3 | In Progress|  |
 | 3. Prediction Pipeline | 0/? | Not started | - |
 | 4. TTS Integration and Echo Prevention | 0/? | Not started | - |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |

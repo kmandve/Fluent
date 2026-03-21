@@ -22,10 +22,10 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 
 ### Stutter Detection
 
-- [ ] **STUT-01**: App detects silent blocks using Web Audio API energy analysis (primary demo focus)
+- [x] **STUT-01**: App detects silent blocks using Web Audio API energy analysis (primary demo focus)
 - [x] **STUT-02**: App detects repetitions ("b-b-b-book") from transcript patterns
 - [x] **STUT-03**: App detects prolongations ("sssssun") via audio duration analysis
-- [ ] **STUT-04**: Detection triggers within 200ms of stutter onset
+- [x] **STUT-04**: Detection triggers within 200ms of stutter onset
 - [x] **STUT-05**: False positive rate low enough that normal pauses and "um"s don't trigger predictions
 
 ### Word Prediction
@@ -96,10 +96,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRANS-01 | Phase 1 | Complete |
 | TRANS-02 | Phase 1 | Complete |
 | TRANS-03 | Phase 1 | Complete |
-| STUT-01 | Phase 2 | Pending |
+| STUT-01 | Phase 2 | Complete |
 | STUT-02 | Phase 2 | Complete |
 | STUT-03 | Phase 2 | Complete |
-| STUT-04 | Phase 2 | Pending |
+| STUT-04 | Phase 2 | Complete |
 | STUT-05 | Phase 2 | Complete |
 | PRED-01 | Phase 3 | Pending |
 | PRED-02 | Phase 3 | Pending |
