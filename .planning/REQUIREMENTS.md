@@ -32,9 +32,9 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 
 - [ ] **PRED-01**: App predicts the intended word using rolling transcript context
 - [ ] **PRED-02**: Local prediction model (n-gram/frequency) fires as primary path
-- [ ] **PRED-03**: LLM API fallback (Groq) fires when local model confidence is low
-- [ ] **PRED-04**: LLM fallback has hard timeout (~200ms) to stay within latency budget
-- [ ] **PRED-05**: Combined detection-to-prediction pipeline completes in under 500ms
+- [x] **PRED-03**: LLM API fallback (Groq) fires when local model confidence is low
+- [x] **PRED-04**: LLM fallback has hard timeout (~200ms) to stay within latency budget
+- [x] **PRED-05**: Combined detection-to-prediction pipeline completes in under 500ms
 
 ### Output
 
@@ -103,9 +103,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STUT-05 | Phase 2 | Complete |
 | PRED-01 | Phase 3 | Pending |
 | PRED-02 | Phase 3 | Pending |
-| PRED-03 | Phase 3 | Pending |
-| PRED-04 | Phase 3 | Pending |
-| PRED-05 | Phase 3 | Pending |
+| PRED-03 | Phase 3 | Complete |
+| PRED-04 | Phase 3 | Complete |
+| PRED-05 | Phase 3 | Complete |
 | OUT-01 | Phase 4 | Pending |
 | OUT-02 | Phase 4 | Pending |
 | OUT-03 | Phase 4 | Pending |

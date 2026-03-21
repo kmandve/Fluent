@@ -80,11 +80,11 @@ Plans:
   3. When local model confidence is below 0.7, an OpenAI API call fires asynchronously — if it returns within 200ms it replaces the local prediction; otherwise the local prediction is used
   4. If both the LLM API and the local model fail, a frequency-list fallback still produces a prediction — the pipeline never returns empty
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md — Local prediction layer: types, word frequency data, bigram index, localPredictor, contextBuilder, store extension
-- [ ] 03-02-PLAN.md — LLM client (OpenAI streaming), prediction engine orchestrator, usePredictionPipeline hook wiring
+- [x] 03-02-PLAN.md — LLM client (OpenAI streaming), prediction engine orchestrator, usePredictionPipeline hook wiring
 
 ---
 
@@ -130,7 +130,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
 | 2. Stutter Detection Engine | 3/3 | Complete   | 2026-03-21 |
-| 3. Prediction Pipeline | 0/2 | Planned | - |
+| 3. Prediction Pipeline | 1/2 | In Progress|  |
 | 4. TTS Integration and Echo Prevention | 0/? | Not started | - |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |
 
