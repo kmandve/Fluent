@@ -102,10 +102,10 @@ Plans:
   3. If two stutter events fire in quick succession, only the most recent prediction is spoken — no backlog or overlapping TTS
   4. The predicted word is simultaneously highlighted in the live transcript when TTS fires
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
+- [x] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
 - [ ] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
 
 ---
@@ -135,7 +135,7 @@ Plans:
 | 1. Audio Pipeline Foundation | 3/3 | Complete   | 2026-03-21 |
 | 2. Stutter Detection Engine | 3/3 | Complete   | 2026-03-21 |
 | 3. Prediction Pipeline | 1/2 | In Progress|  |
-| 4. TTS Integration and Echo Prevention | 0/2 | Planned | - |
+| 4. TTS Integration and Echo Prevention | 1/2 | In Progress|  |
 | 5. UI Polish and Demo Hardening | 0/? | Not started | - |
 
 ---
