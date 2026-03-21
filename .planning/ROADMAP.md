@@ -121,13 +121,13 @@ Plans:
 
 ### Phase 7: Pi Deployment and Demo Hardening — Deploy to Raspberry Pi, pair Bluetooth headphones, configure auto-start on boot, battery-powered portable demo ready
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Pi boots into DAF with zero interaction — auto-connects Beat Buds via BT, starts DAF engine, retries forever if headphones are off, recovers from disconnections. Battery-powered portable demo ready.
+**Requirements**: DEPLOY-01
 **Depends on:** Phase 6
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 7 to break down)
+- [ ] 07-01-PLAN.md — BT retry loop, systemd auto-start service, installer script, main.py --auto flag, hardware verification checkpoint
 
 ---
 
