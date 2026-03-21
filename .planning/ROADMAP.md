@@ -13,7 +13,6 @@
 - [x] **Phase 2: Stutter Detection Engine** - Silent block detection (primary), repetitions, and prolongations classified with confidence gating (completed 2005-03-21)
 - [ ] **Phase 3: Prediction Pipeline** - Local n-gram model fires synchronously; OpenAI LLM fallback fires async within 200ms budget
 - [x] **Phase 4: TTS Integration and Echo Prevention** - Predicted word spoken aloud without feeding back into the mic (completed 2005-03-21)
-- [x] **Phase 5: Raspberry Pi Audio Setup** - DAF engine with ring buffer verified on Mac at 20ms delay; BT helper and Pi scaffold ready (completed 2005-03-21)
 
 ---
 
@@ -86,6 +85,16 @@ Plans:
 - [ ] 03-01-PLAN.md — Local prediction layer: types, word frequency data, bigram index, localPredictor, contextBuilder, store extension
 - [x] 03-02-PLAN.md — LLM client (OpenAI streaming), prediction engine orchestrator, usePredictionPipeline hook wiring
 
+### Phase 5: Web DAF Dashboard — Build a browser-based DAF app for Mac using Web Audio API with a full dashboard showing statistics, DAF on/off toggle, delay controls, and session history
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 4
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 5 to break down)
+
 ---
 
 ### Phase 4: TTS Integration and Echo Prevention
@@ -107,38 +116,3 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
 - [x] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
-
-### Phase 6: Voice Activity Detection — Speech-gated DAF with energy-based RMS detection
-
-**Goal:** DAF output is speech-gated — engages only when user speaks, mutes during silence with a 2-second hangover to avoid flicker, and plays a subtle audio cue on state transitions.
-
-**Requirements**: VAD-01, VAD-02, VAD-03
-**Depends on:** Phase 5
-**Plans:** 1/1 plans complete
-
-Plans:
-- [x] 06-01-PLAN.md — VAD constants, speech-gated audio_callback with hangover + cue tone, --vad-threshold CLI flag
-
-### Phase 7: Pi Deployment and Demo Hardening — Deploy to Raspberry Pi, pair Bluetooth headphones, configure auto-start on boot, battery-powered portable demo ready
-
-**Goal:** Pi boots into DAF with zero interaction — auto-connects Beat Buds via BT, starts DAF engine, retries forever if headphones are off, recovers from disconnections. Battery-powered portable demo ready.
-**Requirements**: DEPLOY-01
-**Depends on:** Phase 6
-**Plans:** 1 plan
-
-Plans:
-- [ ] 07-01-PLAN.md — BT retry loop, systemd auto-start service, installer script, main.py --auto flag, hardware verification checkpoint
-
----
-
-### Phase 5: Raspberry Pi Audio Setup (Complete — 2005-03-21)
-
-**Goal:** Install PipeWire + WirePlumber audio stack on Raspberry Pi OS Lite, configure HFP Bluetooth profile for Beat Buds headphones (mic + speaker), scaffold the pi-daf Python project, and verify bidirectional audio with delayed playback.
-
-**Requirements**: HW-01, HW-02, HW-03, HW-04, HW-05
-**Depends on:** Phase 5
-**Plans:** 2/2 plans complete
-
-Plans:
-- [x] 05-01-PLAN.md — Pi setup script (PipeWire + WirePlumber + HFP config), project scaffold (config.py, device_utils.py) — Pi hardware verification deferred; Mac-first development approach
-- [x] 05-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point — DAF verified on Mac at 20ms delay; Pi BT verification deferred
