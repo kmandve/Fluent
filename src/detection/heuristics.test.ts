@@ -99,11 +99,11 @@ describe('detectProlongation', () => {
     expect(result.stallDurationMs).toBeGreaterThanOrEqual(PROLONGATION_STALL_MS);
   });
 
-  it('caps confidence at 0.85 for very long stalls', () => {
+  it('caps confidence at 0.90 for very long stalls', () => {
     const now = Date.now();
-    // 10 seconds stall — should cap at 0.85
+    // 10 seconds stall — should cap at 0.90
     const result = detectProlongation(0.05, 'sss', 'sss', now - 10000, now);
-    expect(result.confidence).toBeLessThanOrEqual(0.85);
+    expect(result.confidence).toBeLessThanOrEqual(0.90);
   });
 
   it('uses PROLONGATION_ENERGY_FLOOR constant correctly', () => {

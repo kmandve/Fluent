@@ -5,11 +5,11 @@ import { useSessionStore } from '../store/sessionStore';
 
 // ─── Threshold Constants ──────────────────────────────────────────────────────
 
-export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.015;
-export const BLOCK_CONFIRM_MS = 400;
-export const TRANSCRIPT_STALL_MS = 200;
-export const CONFIDENCE_THRESHOLD = 0.72;
-export const COOLDOWN_MS = 1500;
+export const BLOCK_ENERGY_THRESHOLD_DEFAULT = 0.01;
+export const BLOCK_CONFIRM_MS = 800;
+export const TRANSCRIPT_STALL_MS = 500;
+export const CONFIDENCE_THRESHOLD = 0.78;
+export const COOLDOWN_MS = 2500;
 export const CALIBRATION_DURATION_MS = 2500;
 export const CALIBRATION_SAMPLE_INTERVAL_MS = 100;
 
@@ -205,10 +205,10 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       case 'ONSET_SILENCE': {
         const silenceDurationMs = ctx.silenceStartMs !== null ? now - ctx.silenceStartMs : 0;
         if (silenceDurationMs >= BLOCK_CONFIRM_MS) {
-          // Compute confidence: base 0.60 + duration bonus + energy bonus
-          const durationBonus = (silenceDurationMs / 2000) * 0.2;
+          // Compute confidence: base 0.65 + duration bonus + energy bonus
+          const durationBonus = (silenceDurationMs / 2000) * 0.25;
           const energyRatio = Math.max(0, 1 - energyLevel / blockEnergyThreshold);
-          const confidence = Math.min(0.95, 0.60 + durationBonus + energyRatio * 0.15);
+          const confidence = Math.min(0.95, 0.65 + durationBonus + energyRatio * 0.15);
 
           if (confidence >= CONFIDENCE_THRESHOLD) {
             const event = fireEvent(

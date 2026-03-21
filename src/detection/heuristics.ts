@@ -63,7 +63,7 @@ export function detectProlongation(
   const hasSpeechEnergy = energyLevel > PROLONGATION_ENERGY_FLOOR;
 
   if (hasSpeechEnergy && stallDurationMs >= PROLONGATION_STALL_MS) {
-    const confidence = Math.min(0.85, 0.60 + (stallDurationMs / 1000) * 0.1);
+    const confidence = Math.min(0.90, 0.60 + (stallDurationMs / 1000) * 0.15);
     return { detected: true, confidence, stallDurationMs };
   }
   return { detected: false, confidence: 0 };
