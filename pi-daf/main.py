@@ -5,14 +5,16 @@
 # optionally checks Bluetooth pairing status, then starts the DAF engine.
 #
 # Usage examples:
-#   python3 main.py                          # Use default device (Mac: built-in mic)
-#   python3 main.py --list-devices           # Show all audio devices and exit
-#   python3 main.py --mac AA:BB:CC:DD:EE:FF  # Check BT status before starting
-#   python3 main.py --delay 75               # Override DAF delay to 75ms
-#   python3 main.py --hint "Beat Buds"       # Override device name search string
+#   python3 main.py                                    # Use default device (Mac: built-in mic)
+#   python3 main.py --list-devices                     # Show all audio devices and exit
+#   python3 main.py --mac AA:BB:CC:DD:EE:FF            # Check BT status before starting
+#   python3 main.py --delay 75                         # Override DAF delay to 75ms
+#   python3 main.py --hint "Beat Buds"                 # Override device name search string
+#   python3 main.py --auto --mac AA:BB:CC:DD:EE:FF     # Auto mode: retry BT forever, then start DAF
 #
 # On Mac: run without --mac; the app uses your default input/output device.
 # On Pi:  connect Beat Buds first, then run with --mac for BT status check.
+# On Pi (systemd): use --auto --mac for zero-interaction boot-to-DAF flow (D-03).
 
 from __future__ import annotations
 
@@ -92,6 +94,15 @@ Examples:
             "Set to 0 to disable VAD (always-on DAF)."
         ),
     )
+    parser.add_argument(
+        "--auto",
+        action="store_true",
+        help=(
+            "Auto mode: retry BT connection forever until headphones connect, "
+            "then start DAF. Designed for systemd auto-start on boot (per D-03). "
+            "Requires --mac to be set."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -103,8 +114,22 @@ def main() -> None:
         list_all_devices()
         sys.exit(0)
 
-    # ---- Bluetooth status check (Pi only — skipped on Mac) ----
-    if args.mac:
+    # ---- Auto mode: retry BT connection forever, then fall through to start_daf ----
+    # Used by systemd service (--auto --mac <MAC>) for zero-interaction boot-to-DAF flow.
+    # The retry loop blocks here until Beat Buds connect — no user interaction required.
+    if args.auto:
+        if not args.mac:
+            print("[main] ERROR: --auto requires --mac <MAC_ADDRESS>")
+            sys.exit(1)
+        from bt_connect_loop import ensure_trusted, wait_for_connection
+        print("[main] Auto mode: waiting for Beat Buds to connect...")
+        ensure_trusted(args.mac)
+        wait_for_connection(args.mac)
+        print("[main] Beat Buds connected. Starting DAF...")
+        # Fall through to device selection and start_daf below.
+
+    # ---- Bluetooth status check (Pi only — skipped on Mac and in --auto mode) ----
+    elif args.mac:
         print(f"[main] Checking Bluetooth status for {args.mac} ...")
         status = check_bt_status(args.mac)
 
