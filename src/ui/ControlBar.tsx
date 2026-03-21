@@ -1,9 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { useAudioPipeline } from '../hooks/useAudioPipeline';
 import { useSessionStore } from '../store/sessionStore';
 
-export function ControlBar() {
-  const { start, stop, isListening } = useAudioPipeline();
+interface ControlBarProps {
+  start: () => void;
+  stop: () => void;
+  isListening: boolean;
+}
+
+export function ControlBar({ start, stop, isListening }: ControlBarProps) {
   const energyLevel = useSessionStore((s) => s.energyLevel);
   const energyLogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

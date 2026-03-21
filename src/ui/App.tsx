@@ -5,8 +5,15 @@ import { ErrorOverlay } from './ErrorOverlay';
 import { DetectionLog } from './DetectionLog';
 import { isSpeechRecognitionSupported } from '../utils/browserCompat';
 import { useSessionStore } from '../store/sessionStore';
+import { useAudioPipeline } from '../hooks/useAudioPipeline';
+import { usePredictionPipeline } from '../hooks/usePredictionPipeline';
+import { useTTSOutput } from '../hooks/useTTSOutput';
 
 export function App() {
+  const { start, stop, isListening, captureManager } = useAudioPipeline();
+  usePredictionPipeline();
+  useTTSOutput(captureManager);
+
   const lastDetection = useSessionStore((s) => s.lastDetection);
   const [highlightActive, setHighlightActive] = useState(false);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,7 +61,7 @@ export function App() {
         </div>
 
         <div className="mt-4">
-          <ControlBar />
+          <ControlBar start={start} stop={stop} isListening={isListening} />
         </div>
 
         {/* Detection log panel — only visible during active session */}
