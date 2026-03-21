@@ -103,8 +103,10 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
   // ─── tick ────────────────────────────────────────────────────────────────────
 
   function tick(energyLevel: number, interimText: string, now: number): StutterEvent | null {
-    // 1. Track interim text changes
-    if (interimText !== ctx.lastInterimText) {
+    // 1. Track interim text changes — save previous text BEFORE updating
+    const previousInterimText = ctx.lastInterimText;
+    const textChanged = interimText !== ctx.lastInterimText;
+    if (textChanged) {
       ctx.lastInterimText = interimText;
       ctx.lastInterimChangeMs = now;
     }
@@ -119,7 +121,22 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       ctx.state = 'FLUENT';
     }
 
-    // 4. Repetition check (takes priority over block — repetitions can coexist with moderate energy)
+    // 4. Sentence-end guard: if interim text just went empty while previous had content,
+    //    that's a finalized sentence — not a block. Reset FSM state.
+    if (interimText === '' && previousInterimText !== '') {
+      if (ctx.state === 'ONSET_SILENCE') {
+        ctx.state = 'FLUENT';
+        ctx.silenceStartMs = null;
+      }
+      return null;
+    }
+
+    // 5. Guard: empty-to-empty transcript (recognition restart, no speech yet)
+    if (interimText === '' && previousInterimText === '') {
+      return null;
+    }
+
+    // 6. Repetition check (takes priority over block — repetitions can coexist with moderate energy)
     const repetitionResult = detectRepetition(interimText);
     if (repetitionResult.detected && repetitionResult.confidence >= CONFIDENCE_THRESHOLD) {
       const event = fireEvent(
@@ -134,11 +151,12 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       return event;
     }
 
-    // 5. Prolongation check
+    // 7. Prolongation check — use previousInterimText (before this tick's update)
+    //    so the stall comparison is meaningful
     const prolongationResult = detectProlongation(
       energyLevel,
       interimText,
-      ctx.lastInterimText,
+      previousInterimText,
       ctx.lastInterimChangeMs,
       now
     );
@@ -155,7 +173,7 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       return event;
     }
 
-    // 6. Block detection FSM
+    // 8. Block detection FSM
     // Guard: filler word at end of transcript → suppress
     if (endsWithFiller(interimText)) {
       if (ctx.state === 'ONSET_SILENCE') {
@@ -165,15 +183,19 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       return null;
     }
 
-    // Guard: empty-to-empty transcript (recognition restart pitfall)
-    if (interimText === '' && ctx.lastInterimText === '') {
+    // Guard: if energy is above prolongation floor, user is making sound — not a silent block
+    if (energyLevel > blockEnergyThreshold) {
+      if (ctx.state === 'ONSET_SILENCE') {
+        ctx.state = 'FLUENT';
+        ctx.silenceStartMs = null;
+      }
       return null;
     }
 
     switch (ctx.state) {
       case 'FLUENT': {
         const transcriptStalled = now - ctx.lastInterimChangeMs > TRANSCRIPT_STALL_MS;
-        if (energyLevel < blockEnergyThreshold && transcriptStalled) {
+        if (energyLevel < blockEnergyThreshold && transcriptStalled && interimText !== '') {
           ctx.state = 'ONSET_SILENCE';
           ctx.silenceStartMs = now;
         }
@@ -181,13 +203,6 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
       }
 
       case 'ONSET_SILENCE': {
-        // Energy spike → reset
-        if (energyLevel >= blockEnergyThreshold) {
-          ctx.state = 'FLUENT';
-          ctx.silenceStartMs = null;
-          return null;
-        }
-
         const silenceDurationMs = ctx.silenceStartMs !== null ? now - ctx.silenceStartMs : 0;
         if (silenceDurationMs >= BLOCK_CONFIRM_MS) {
           // Compute confidence: base 0.60 + duration bonus + energy bonus
