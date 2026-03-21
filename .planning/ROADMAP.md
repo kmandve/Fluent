@@ -171,15 +171,17 @@ Plans:
 
 **Coverage: 24/24 v1 requirements mapped.**
 
-### Phase 6: Raspberry Pi Audio Setup — Set up audio capture and playback on Raspberry Pi using ALSA/PulseAudio, configure USB microphone input and audio output routing
+### Phase 6: Raspberry Pi Audio Setup
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Install PipeWire + WirePlumber audio stack on Raspberry Pi OS Lite, configure HFP Bluetooth profile for Beat Buds headphones (mic + speaker), scaffold the pi-daf Python project, and verify bidirectional audio with delayed playback.
+
+**Requirements**: HW-01, HW-02, HW-03, HW-04, HW-05
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+- [ ] 06-01-PLAN.md — Pi setup script (PipeWire + WirePlumber + HFP config), project scaffold (config.py, device_utils.py)
+- [ ] 06-02-PLAN.md — BT pairing helper, DAF engine (ring buffer delay), main.py entry point, end-to-end audio verification
 
 ### Phase 7: Bluetooth Headphone Connection — Pair and connect Bluetooth wireless headphones to Raspberry Pi, configure as audio output sink with low-latency A2DP profile
 
@@ -223,4 +225,4 @@ Plans:
 
 ---
 *Created: 2026-03-20*
-*Last updated: 2026-03-21 after Phase 4 planning*
+*Last updated: 2026-03-21 after Phase 6 planning*
