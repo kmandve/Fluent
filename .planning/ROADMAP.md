@@ -171,6 +171,56 @@ Plans:
 
 **Coverage: 24/24 v1 requirements mapped.**
 
+### Phase 6: Raspberry Pi Audio Setup — Set up audio capture and playback on Raspberry Pi using ALSA/PulseAudio, configure USB microphone input and audio output routing
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)
+
+### Phase 7: Bluetooth Headphone Connection — Pair and connect Bluetooth wireless headphones to Raspberry Pi, configure as audio output sink with low-latency A2DP profile
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 6
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 7 to break down)
+
+### Phase 8: Conversation Detection (VAD) — Detect when a conversation is happening using Voice Activity Detection so DAF only engages during active speech and disengages during silence
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 7
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 8 to break down)
+
+### Phase 9: DAF Engine — Implement Delayed Auditory Feedback with configurable 20ms delay, capture mic input and play back through Bluetooth headphones with precise low-latency audio loop
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 8
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 9 to break down)
+
+### Phase 10: Integration and Demo Hardening — Wire VAD to DAF toggle, test end-to-end on Raspberry Pi with Bluetooth headphones, auto-start on boot, portable demo-ready
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 9
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 10 to break down)
+
 ---
 *Created: 2026-03-20*
 *Last updated: 2026-03-21 after Phase 4 planning*

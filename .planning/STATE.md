@@ -91,6 +91,14 @@ Plan: 2 of 2
 - [ ] Plan calibration session with a real stuttering speaker in Phase 2 to tune heuristic thresholds
 - [ ] Run "Looks Done But Isn't" checklist on actual demo hardware at end of Phase 5
 
+### Roadmap Evolution
+
+- Phase 6 added: Raspberry Pi Audio Setup — ALSA/PulseAudio, USB mic, audio output routing
+- Phase 7 added: Bluetooth Headphone Connection — Pair BT headphones, low-latency A2DP
+- Phase 8 added: Conversation Detection (VAD) — Voice Activity Detection to gate DAF on/off
+- Phase 9 added: DAF Engine — Delayed Auditory Feedback with 20ms delay loop
+- Phase 10 added: Integration and Demo Hardening — End-to-end on Pi with BT headphones, auto-start
+
 ### Blockers
 
 None currently.
