@@ -30,5 +30,5 @@ else:
     BLOCK_SIZE = 256          # ~32ms at 8kHz — balance between latency and stability
 
 CHANNELS = 1              # Mono for both HFP and Mac built-in mic
-DELAY_MS = 50             # DAF therapeutic target (research: 50-75ms optimal)
+DELAY_MS = 20             # DAF delay in milliseconds (adjustable via --delay flag)
 DEVICE_NAME_HINT = "bluez"  # Substring to match BT device in sounddevice (Pi only)
