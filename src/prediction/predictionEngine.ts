@@ -5,6 +5,8 @@ import type { StutterEvent } from '../detection/types';
 
 export const LLM_TIMEOUT_MS = 200;
 export const LOCAL_CONFIDENCE_THRESHOLD = 0.7;
+export const MIN_CONTEXT_WORDS = 3;
+export const MIN_SPEAK_CONFIDENCE = 0.6;
 
 // Module-level duplicate guard — tracks the last processed event ID
 let lastProcessedEventId: string | null = null;
@@ -34,8 +36,16 @@ export async function predict(
   lastProcessedEventId = event.id;
 
   const t0 = performance.now();
+
+  // Gate: not enough context to make a meaningful prediction — stay silent
+  if (contextWords.length < MIN_CONTEXT_WORDS) {
+    console.debug('[prediction] Skipped — only', contextWords.length, 'context words (need', MIN_CONTEXT_WORDS + ')');
+    return null;
+  }
+
   const local = localPredict(contextWords);
 
+  // Gate: local prediction is confident enough — speak immediately
   if (local.confidence >= LOCAL_CONFIDENCE_THRESHOLD) {
     return {
       word: local.word,
@@ -60,13 +70,18 @@ export async function predict(
     };
   } catch {
     clearTimeout(timeoutId);
-    // LLM timed out or failed — use local prediction as safety net
-    return {
-      word: local.word,
-      source: 'local-fallback',
-      latencyMs: performance.now() - t0,
-      triggeredByEventId: event.id,
-    };
+    // LLM failed — only speak low-confidence local prediction if it's above minimum bar
+    if (local.confidence >= MIN_SPEAK_CONFIDENCE) {
+      return {
+        word: local.word,
+        source: 'local-fallback',
+        latencyMs: performance.now() - t0,
+        triggeredByEventId: event.id,
+      };
+    }
+    // Not confident enough — stay silent rather than say something wrong
+    console.debug('[prediction] Skipped — local confidence', local.confidence, 'below', MIN_SPEAK_CONFIDENCE);
+    return null;
   }
 }
 
