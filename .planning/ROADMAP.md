@@ -108,15 +108,16 @@ Plans:
 - [x] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
 - [x] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
 
-### Phase 6: Voice Activity Detection — Add VAD to auto-enable DAF when speech is detected and disable during silence, using webrtcvad or energy-based detection in Python
+### Phase 6: Voice Activity Detection — Speech-gated DAF with energy-based RMS detection
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** DAF output is speech-gated — engages only when user speaks, mutes during silence with a 2-second hangover to avoid flicker, and plays a subtle audio cue on state transitions.
+
+**Requirements**: VAD-01, VAD-02, VAD-03
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+- [ ] 06-01-PLAN.md — VAD constants, speech-gated audio_callback with hangover + cue tone, --vad-threshold CLI flag
 
 ### Phase 7: Pi Deployment and Demo Hardening — Deploy to Raspberry Pi, pair Bluetooth headphones, configure auto-start on boot, battery-powered portable demo ready
 
