@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { StutterEvent } from '../detection/types';
 
 export interface TranscriptEntry {
   id: string;
@@ -14,11 +15,16 @@ export interface SessionState {
   energyLevel: number;
   errorState: 'none' | 'mic-denied' | 'unsupported';
 
+  detectionEvents: StutterEvent[];
+  lastDetection: StutterEvent | null;
+
   setListening: (listening: boolean) => void;
   addFinalTranscript: (text: string) => void;
   setInterimText: (text: string) => void;
   setEnergyLevel: (level: number) => void;
   setErrorState: (state: SessionState['errorState']) => void;
+  addDetectionEvent: (event: StutterEvent) => void;
+  clearDetectionEvents: () => void;
   resetSession: () => void;
 }
 
@@ -28,6 +34,8 @@ export const useSessionStore = create<SessionState>((set) => ({
   interimText: '',
   energyLevel: 0,
   errorState: 'none',
+  detectionEvents: [],
+  lastDetection: null,
 
   setListening: (listening) => set({ isListening: listening }),
   addFinalTranscript: (text) =>
@@ -46,6 +54,12 @@ export const useSessionStore = create<SessionState>((set) => ({
   setInterimText: (text) => set({ interimText: text }),
   setEnergyLevel: (level) => set({ energyLevel: level }),
   setErrorState: (errorState) => set({ errorState }),
+  addDetectionEvent: (event) =>
+    set((state) => ({
+      detectionEvents: [...state.detectionEvents.slice(-19), event],
+      lastDetection: event,
+    })),
+  clearDetectionEvents: () => set({ detectionEvents: [], lastDetection: null }),
   resetSession: () =>
     set({
       isListening: false,
@@ -53,5 +67,7 @@ export const useSessionStore = create<SessionState>((set) => ({
       interimText: '',
       energyLevel: 0,
       errorState: 'none',
+      detectionEvents: [],
+      lastDetection: null,
     }),
 }));
