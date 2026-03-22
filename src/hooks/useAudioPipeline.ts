@@ -9,10 +9,10 @@ import { createStutterDetector, calibrateAmbientNoise } from '../detection/stutt
 // Set high so only the wearer's voice (close to mic) triggers DAF — not others in the room
 const VAD_RMS_THRESHOLD = 0.04;
 const VAD_HANGOVER_MS = 2000;
-const CUE_FREQ_ON = 880;
-const CUE_FREQ_OFF = 440;
-const CUE_DURATION_MS = 60;
-const CUE_VOLUME = 0.08;
+const CUE_FREQ_ON = 520;
+const CUE_FREQ_OFF = 380;
+const CUE_DURATION_MS = 150;
+const CUE_VOLUME = 0.05;
 
 export function useAudioPipeline() {
   const captureManagerRef = useRef(createCaptureManager());
@@ -27,18 +27,28 @@ export function useAudioPipeline() {
   const lastSpeechTimeRef = useRef(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Play a short sine tone as audio cue
+  // Play a gentle chime — smooth fade in/out, soft sine tone
   const playCue = useCallback((freq: number) => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
+    const duration = CUE_DURATION_MS / 1000;
+    const now = ctx.currentTime;
+
     const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    osc.type = 'sine';
     osc.frequency.value = freq;
-    gain.gain.value = CUE_VOLUME;
+
+    const gain = ctx.createGain();
+    // Smooth fade in over first 40%, hold, fade out over last 40%
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(CUE_VOLUME, now + duration * 0.4);
+    gain.gain.setValueAtTime(CUE_VOLUME, now + duration * 0.6);
+    gain.gain.linearRampToValueAtTime(0, now + duration);
+
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + CUE_DURATION_MS / 1000);
+    osc.start(now);
+    osc.stop(now + duration + 0.01);
     osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }, []);
 
