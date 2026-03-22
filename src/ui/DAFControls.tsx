@@ -7,58 +7,61 @@ export function DAFControls() {
   const setDafEnabled = useSessionStore((s) => s.setDafEnabled);
   const setDafDelayMs = useSessionStore((s) => s.setDafDelayMs);
 
-  const handleToggle = () => {
-    setDafEnabled(!dafEnabled);
-  };
-
-  const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDafDelayMs(Number(e.target.value));
-  };
-
   return (
-    <div className="bg-gray-900 border border-gray-700/50 rounded-lg p-4 flex flex-col gap-3">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        DAF Control
-      </p>
-
-      {/* Toggle button */}
-      <button
-        onClick={handleToggle}
-        disabled={!isListening}
-        className={`
-          w-full py-3 rounded-full font-bold text-sm tracking-wide transition-colors
-          ${dafEnabled
-            ? 'bg-green-500 hover:bg-green-400 text-white'
-            : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-          }
-          disabled:opacity-40 disabled:cursor-not-allowed
-        `}
-      >
-        DAF {dafEnabled ? 'ON' : 'OFF'}
-      </button>
-
-      {/* Current delay readout */}
-      <div className="text-center">
-        <span className="text-3xl font-mono font-bold text-white">
-          {dafDelayMs}
-        </span>
-        <span className="text-gray-400 text-sm ml-1">ms</span>
+    <div className="glass rounded-xl p-5 flex flex-col gap-4 glass-hover transition-all duration-300">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          DAF Control
+        </p>
+        <div className={`
+          w-2 h-2 rounded-full transition-all duration-500
+          ${dafEnabled ? 'bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-600'}
+        `} />
       </div>
 
-      {/* Delay slider */}
-      <div className="flex flex-col gap-1">
+      {/* Status + Toggle */}
+      <button
+        onClick={() => setDafEnabled(!dafEnabled)}
+        disabled={!isListening}
+        className={`
+          w-full py-3 rounded-xl font-semibold text-sm tracking-wide
+          transition-all duration-300 ease-out
+          ${dafEnabled
+            ? 'bg-green-500/15 text-green-400 border border-green-500/30 hover:bg-green-500/25 shadow-[0_0_15px_rgba(34,197,94,0.1)]'
+            : 'bg-gray-800/80 text-gray-400 border border-gray-700 hover:bg-gray-700/80 hover:text-gray-300'
+          }
+          disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800/80
+        `}
+      >
+        {dafEnabled ? 'DAF Enabled' : 'DAF Disabled'}
+      </button>
+
+      {/* Delay display */}
+      <div className="text-center">
+        <span className={`
+          text-4xl font-mono font-bold tracking-tight transition-colors duration-300
+          ${dafEnabled ? 'text-white' : 'text-gray-500'}
+        `}>
+          {dafDelayMs}
+        </span>
+        <span className="text-gray-500 text-sm ml-1.5">ms delay</span>
+      </div>
+
+      {/* Slider */}
+      <div className="flex flex-col gap-2">
         <input
           type="range"
           min={10}
           max={100}
           step={1}
           value={dafDelayMs}
-          onChange={handleSlider}
+          onChange={(e) => setDafDelayMs(Number(e.target.value))}
           disabled={!isListening}
-          className="w-full accent-green-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full"
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-[10px] text-gray-600 px-0.5">
           <span>10ms</span>
+          <span>50ms</span>
           <span>100ms</span>
         </div>
       </div>

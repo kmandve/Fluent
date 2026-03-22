@@ -21,43 +21,70 @@ export function Dashboard({ analyzer, start, stop, isListening }: DashboardProps
   const dafEnabled = useSessionStore((s) => s.dafEnabled);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6 max-w-4xl mx-auto flex flex-col gap-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-white tracking-tight">Fluent</h1>
-          {isListening && (
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-              dafEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'
-            }`}>
-              {dafEnabled ? 'DAF Active' : 'Listening'}
-            </span>
-          )}
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-950 to-slate-950 text-white">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5 min-h-screen">
+
+        {/* Header */}
+        <header className="flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                Fluent
+              </h1>
+              <p className="text-xs text-gray-500 mt-0.5">Delayed Auditory Feedback</p>
+            </div>
+            {isListening && (
+              <span className={`
+                text-xs font-medium px-3 py-1 rounded-full transition-all duration-500
+                ${dafEnabled
+                  ? 'bg-green-500/15 text-green-400 border border-green-500/30 animate-pulse-glow'
+                  : 'bg-gray-800 text-gray-400 border border-gray-700'
+                }
+              `}>
+                {dafEnabled ? 'DAF Active' : 'Listening'}
+              </span>
+            )}
+          </div>
+          <ControlBar start={start} stop={stop} isListening={isListening} />
+        </header>
+
+        {/* Waveform */}
+        <div className="animate-slide-up delay-100">
+          <WaveformDisplay analyserNode={analyserNode} isActive={isListening} dafEnabled={dafEnabled} />
         </div>
-        <ControlBar start={start} stop={stop} isListening={isListening} />
-      </div>
 
-      {/* Waveform — full width */}
-      <WaveformDisplay analyserNode={analyserNode} />
-
-      {/* Controls row: DAF Controls + Session Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DAFControls />
-        <SessionStats />
-      </div>
-
-      {/* Transcript */}
-      <div className="bg-gray-900 border border-gray-700/50 rounded-lg overflow-hidden">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 pt-3 pb-1">
-          Live Transcript
-        </p>
-        <div className="max-h-[25vh]">
-          <TranscriptDisplay />
+        {/* Controls grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up delay-200">
+          <DAFControls />
+          <SessionStats />
         </div>
-      </div>
 
-      {/* Detection History */}
-      <DetectionLog />
+        {/* Bottom panels */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 animate-slide-up delay-300">
+          {/* Transcript */}
+          <div className="glass rounded-xl overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-green-400 animate-pulse' : 'bg-gray-600'}`} />
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Live Transcript
+              </p>
+            </div>
+            <div className="flex-1 max-h-[30vh] lg:max-h-[40vh]">
+              <TranscriptDisplay />
+            </div>
+          </div>
+
+          {/* Detection History */}
+          <div className="animate-slide-up delay-400">
+            <DetectionLog />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="text-center py-3 text-gray-600 text-xs animate-fade-in delay-400">
+          Built for HackVH 2026
+        </footer>
+      </div>
     </div>
   );
 }

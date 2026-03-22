@@ -7,7 +7,6 @@ export function TranscriptDisplay() {
   const isListening = useSessionStore((s) => s.isListening);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // D-02: Auto-scroll to keep latest text visible
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [transcript, interimText]);
@@ -15,30 +14,27 @@ export function TranscriptDisplay() {
   const isEmpty = transcript.length === 0 && !interimText;
 
   return (
-    <div className="overflow-y-auto max-h-[30vh] bg-gray-900 p-4 min-h-[80px] flex flex-col">
-      {isEmpty && !isListening ? (
-        <p className="text-gray-500 italic text-lg text-center mt-8">
-          Click Start to begin...
+    <div className="overflow-y-auto flex-1 px-4 py-3 flex flex-col gap-1">
+      {isEmpty ? (
+        <p className="text-gray-600 text-sm text-center py-6 animate-breathe">
+          {isListening ? 'Listening for speech...' : 'Click Start to begin'}
         </p>
       ) : (
         <>
-          {/* D-01: Rolling log — new entries append at bottom, older text scrolls up */}
-          {transcript.map((entry) => (
-            <p key={entry.id} className="text-white text-lg mb-1">
+          {transcript.map((entry, i) => (
+            <p
+              key={entry.id}
+              className="text-gray-200 text-sm leading-relaxed animate-fade-in"
+              style={{ animationDelay: `${Math.min(i * 30, 200)}ms` }}
+            >
               {entry.text}
             </p>
           ))}
-
-          {/* Interim text shown in gray italic at the bottom */}
           {interimText && (
-            <p className="text-gray-400 text-lg italic">{interimText}</p>
+            <p className="text-gray-500 text-sm italic animate-fade-in">{interimText}</p>
           )}
-
-
         </>
       )}
-
-      {/* Scroll anchor — always at bottom of the list */}
       <div ref={bottomRef} />
     </div>
   );
