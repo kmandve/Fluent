@@ -5,6 +5,14 @@ import { createDAFEngine, type DAFEngine } from '../audio/dafEngine';
 import { useSessionStore } from '../store/sessionStore';
 import { createStutterDetector, calibrateAmbientNoise } from '../detection/stutterDetector';
 
+// VAD constants for speech-gated DAF
+const VAD_RMS_THRESHOLD = 0.015;
+const VAD_HANGOVER_MS = 2000;
+const CUE_FREQ_ON = 880;
+const CUE_FREQ_OFF = 440;
+const CUE_DURATION_MS = 60;
+const CUE_VOLUME = 0.08;
+
 export function useAudioPipeline() {
   const captureManagerRef = useRef(createCaptureManager());
   const analyzerRef = useRef<AcousticAnalyzer | null>(null);
@@ -13,94 +21,133 @@ export function useAudioPipeline() {
   const detectorRef = useRef<ReturnType<typeof createStutterDetector> | null>(null);
   const isListening = useSessionStore((s) => s.isListening);
 
+  // VAD state (kept in refs so the 100ms tick can access without re-renders)
+  const vadActiveRef = useRef(false);
+  const lastSpeechTimeRef = useRef(0);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Play a short sine tone as audio cue
+  const playCue = useCallback((freq: number) => {
+    const ctx = audioCtxRef.current;
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = freq;
+    gain.gain.value = CUE_VOLUME;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + CUE_DURATION_MS / 1000);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+  }, []);
+
   const start = useCallback(async () => {
     const manager = captureManagerRef.current;
     const stream = await manager.start();
 
-    if (!stream) return; // getUserMedia failed, error state already set
+    if (!stream) return;
 
-    // Start acoustic energy track from the same getUserMedia stream
     const analyzer = createAcousticAnalyzer(stream);
     analyzerRef.current = analyzer;
+    audioCtxRef.current = analyzer.getAudioContext();
 
-    // Create stutter detector
     const detector = createStutterDetector();
     detectorRef.current = detector;
 
-    // Create DAF engine reusing the same AudioContext and source node
     const dafEngine = createDAFEngine(analyzer.getAudioContext(), analyzer.getSource());
     dafEngineRef.current = dafEngine;
 
-    // Auto-enable DAF when listening starts
+    // Set delay from store but DON'T enable yet — VAD will enable when speech starts
     const { dafDelayMs } = useSessionStore.getState();
     dafEngine.setDelay(dafDelayMs);
-    dafEngine.enable();
-    useSessionStore.getState().setDafEnabled(true);
+    useSessionStore.getState().setDafEnabled(false);
 
-    // Run ambient noise calibration (non-blocking — detector works with default
-    // threshold until calibration completes)
+    // Reset VAD state
+    vadActiveRef.current = false;
+    lastSpeechTimeRef.current = 0;
+
     calibrateAmbientNoise(analyzer.getRMS).then((threshold) => {
       console.debug('[useAudioPipeline] Ambient calibration complete, threshold:', threshold);
       detector.setThreshold(threshold);
     });
 
-    // Poll RMS at 100ms intervals, write to store, and drive stutter detection
+    // 100ms tick: energy polling + stutter detection + VAD-gated DAF
     energyIntervalRef.current = setInterval(() => {
       const rms = analyzer.getRMS();
       useSessionStore.getState().setEnergyLevel(rms);
 
-      // Drive stutter detection on same 100ms tick
       const { interimText } = useSessionStore.getState();
       detectorRef.current?.tick(rms, interimText, Date.now());
+
+      // --- VAD: speech-gated DAF ---
+      const now = Date.now();
+      const isSpeech = rms > VAD_RMS_THRESHOLD;
+
+      if (isSpeech) {
+        lastSpeechTimeRef.current = now;
+
+        // Activate DAF if not already active
+        if (!vadActiveRef.current) {
+          vadActiveRef.current = true;
+          dafEngineRef.current?.enable();
+          useSessionStore.getState().setDafEnabled(true);
+          playCue(CUE_FREQ_ON);
+          console.debug('[VAD] Speech detected — DAF ON');
+        }
+      } else if (vadActiveRef.current) {
+        // Check hangover: deactivate after 2s of silence
+        const silenceMs = now - lastSpeechTimeRef.current;
+        if (silenceMs >= VAD_HANGOVER_MS) {
+          vadActiveRef.current = false;
+          dafEngineRef.current?.disable();
+          useSessionStore.getState().setDafEnabled(false);
+          playCue(CUE_FREQ_OFF);
+          console.debug('[VAD] Silence for', silenceMs, 'ms — DAF OFF');
+        }
+      }
     }, 100);
 
     useSessionStore.getState().setListening(true);
-  }, []);
+  }, [playCue]);
 
   const stop = useCallback(() => {
-    // Destroy DAF engine before stopping analyzer (DAF holds refs to audioCtx nodes)
     if (dafEngineRef.current) {
       dafEngineRef.current.destroy();
       dafEngineRef.current = null;
     }
 
-    // Reset stutter detector
     if (detectorRef.current) {
       detectorRef.current.reset();
       detectorRef.current = null;
     }
 
-    // Stop energy polling
     if (energyIntervalRef.current) {
       clearInterval(energyIntervalRef.current);
       energyIntervalRef.current = null;
     }
 
-    // Stop acoustic analyzer (closes AudioContext)
     if (analyzerRef.current) {
       analyzerRef.current.stop();
       analyzerRef.current = null;
     }
 
-    // Stop capture manager (stops recognition + mic tracks)
+    audioCtxRef.current = null;
+    vadActiveRef.current = false;
+
     captureManagerRef.current.stop();
 
     useSessionStore.getState().setListening(false);
     useSessionStore.getState().setEnergyLevel(0);
+    useSessionStore.getState().setDafEnabled(false);
   }, []);
 
-  // Subscribe to DAF state changes from store and apply to engine
+  // Subscribe to delay slider changes and apply to engine in real-time
   useEffect(() => {
     const unsub = useSessionStore.subscribe(
-      (s) => ({ dafEnabled: s.dafEnabled, dafDelayMs: s.dafDelayMs }),
-      ({ dafEnabled, dafDelayMs }) => {
-        const engine = dafEngineRef.current;
-        if (!engine) return;
-        engine.setDelay(dafDelayMs);
-        if (dafEnabled) engine.enable();
-        else engine.disable();
-      },
-      { equalityFn: (a, b) => a.dafEnabled === b.dafEnabled && a.dafDelayMs === b.dafDelayMs }
+      (s) => s.dafDelayMs,
+      (dafDelayMs) => {
+        dafEngineRef.current?.setDelay(dafDelayMs);
+      }
     );
     return unsub;
   }, []);
