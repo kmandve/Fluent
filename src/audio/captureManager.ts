@@ -24,17 +24,11 @@ export function createCaptureManager(): CaptureManager {
   let mediaStream: MediaStream | null = null;
   let recognitionPaused = false;
 
-  recognition.onstart = () => {
-    console.debug('[captureManager] SpeechRecognition started');
-  };
+  recognition.onstart = () => {};
 
-  recognition.onaudiostart = () => {
-    console.debug('[captureManager] Audio capture started');
-  };
+  recognition.onaudiostart = () => {};
 
-  recognition.onspeechstart = () => {
-    console.debug('[captureManager] Speech detected');
-  };
+  recognition.onspeechstart = () => {};
 
   recognition.onresult = (event: SpeechRecognitionEvent) => {
     // Reset restart counter on successful speech detection
@@ -53,8 +47,6 @@ export function createCaptureManager(): CaptureManager {
       }
     }
 
-    console.debug('[captureManager] result:', { finalTranscript, interimTranscript });
-
     if (finalTranscript) {
       useSessionStore.getState().addFinalTranscript(finalTranscript);
     }
@@ -62,7 +54,6 @@ export function createCaptureManager(): CaptureManager {
   };
 
   recognition.onend = () => {
-    console.debug('[captureManager] SpeechRecognition ended, isListening:', isListening, 'paused:', recognitionPaused);
     if (isListening && !recognitionPaused && restartAttempts < MAX_RESTART_ATTEMPTS) {
       restartAttempts++;
       setTimeout(() => {
@@ -101,7 +92,6 @@ export function createCaptureManager(): CaptureManager {
 
       try {
         recognition.start();
-        console.debug('[captureManager] recognition.start() called');
       } catch (_e) {
         console.warn('[captureManager] recognition.start() threw:', _e);
       }
@@ -118,7 +108,6 @@ export function createCaptureManager(): CaptureManager {
         },
       });
       mediaStream = stream;
-      console.debug('[captureManager] getUserMedia stream obtained');
 
       return stream;
     } catch (err) {
@@ -146,7 +135,6 @@ export function createCaptureManager(): CaptureManager {
     if (recognitionPaused) return; // Already paused — no-op
     recognitionPaused = true;
     recognition.stop(); // Stop recognition only — mediaStream stays alive
-    console.debug('[captureManager] Recognition paused (MediaStream still active)');
   }
 
   function resumeRecognition(): void {
@@ -155,7 +143,6 @@ export function createCaptureManager(): CaptureManager {
     restartAttempts = 0;
     try {
       recognition.start();
-      console.debug('[captureManager] Recognition resumed');
     } catch (_e) {
       console.warn('[captureManager] Recognition resume threw:', _e);
     }

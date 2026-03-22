@@ -50,7 +50,6 @@ export function calibrateAmbientNoise(
 
       // Use the higher of computed and default — ambient noise floor should raise the threshold, not lower it
       const threshold = Math.max(computed, BLOCK_ENERGY_THRESHOLD_DEFAULT);
-      console.debug('[calibration] p95:', p95.toFixed(5), 'computed:', computed.toFixed(5), 'final threshold:', threshold.toFixed(5));
       resolve(threshold);
     }, durationMs);
   });
@@ -207,11 +206,6 @@ export function createStutterDetector(options?: { blockEnergyThreshold?: number 
         ctx.silenceStartMs = null;
       }
       return null;
-    }
-
-    // Debug: log state transitions (remove for production)
-    if (ctx.state !== 'FLUENT') {
-      console.debug('[detector]', ctx.state, 'energy:', energyLevel.toFixed(4), 'threshold:', blockEnergyThreshold.toFixed(4), 'interim:', interimText.slice(-20));
     }
 
     switch (ctx.state) {

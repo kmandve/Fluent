@@ -78,7 +78,6 @@ export function useAudioPipeline() {
     lastSpeechTimeRef.current = 0;
 
     calibrateAmbientNoise(analyzer.getRMS).then((threshold) => {
-      console.debug('[useAudioPipeline] Ambient calibration complete, threshold:', threshold);
       detector.setThreshold(threshold);
     });
 
@@ -94,11 +93,6 @@ export function useAudioPipeline() {
       const now = Date.now();
       const isSpeech = rms > VAD_RMS_THRESHOLD;
 
-      // Debug: log every 2s so you can see RMS vs threshold
-      if (now % 2000 < 100) {
-        console.debug('[VAD] rms:', rms.toFixed(4), 'threshold:', VAD_RMS_THRESHOLD, 'speech:', isSpeech, 'dafActive:', vadActiveRef.current);
-      }
-
       if (isSpeech) {
         lastSpeechTimeRef.current = now;
 
@@ -108,7 +102,6 @@ export function useAudioPipeline() {
           dafEngineRef.current?.enable();
           useSessionStore.getState().setDafEnabled(true);
           playCue(CUE_FREQ_ON);
-          console.debug('[VAD] Speech detected — DAF ON');
         }
       } else if (vadActiveRef.current) {
         // Check hangover: deactivate after 2s of silence
@@ -118,7 +111,6 @@ export function useAudioPipeline() {
           dafEngineRef.current?.disable();
           useSessionStore.getState().setDafEnabled(false);
           playCue(CUE_FREQ_OFF);
-          console.debug('[VAD] Silence for', silenceMs, 'ms — DAF OFF');
         }
       }
     }, 100);
