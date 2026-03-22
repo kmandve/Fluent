@@ -1,5 +1,11 @@
 import { useSessionStore } from '../store/sessionStore';
 
+const PRESETS = [
+  { label: '20ms', value: 20 },
+  { label: '50ms', value: 50 },
+  { label: '75ms', value: 75 },
+];
+
 export function DAFControls() {
   const dafEnabled = useSessionStore((s) => s.dafEnabled);
   const dafDelayMs = useSessionStore((s) => s.dafDelayMs);
@@ -19,7 +25,7 @@ export function DAFControls() {
         `} />
       </div>
 
-      {/* Status + Toggle */}
+      {/* Toggle */}
       <button
         onClick={() => setDafEnabled(!dafEnabled)}
         disabled={!isListening}
@@ -44,7 +50,28 @@ export function DAFControls() {
         `}>
           {dafDelayMs}
         </span>
-        <span className="text-gray-500 text-sm ml-1.5">ms delay</span>
+        <span className="text-gray-500 text-sm ml-1.5">ms</span>
+      </div>
+
+      {/* Presets */}
+      <div className="flex gap-2">
+        {PRESETS.map((p) => (
+          <button
+            key={p.value}
+            onClick={() => setDafDelayMs(p.value)}
+            disabled={!isListening}
+            className={`
+              flex-1 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
+              ${dafDelayMs === p.value
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'bg-gray-800/50 text-gray-500 border border-gray-700/50 hover:text-gray-300 hover:bg-gray-700/50'
+              }
+              disabled:opacity-30 disabled:cursor-not-allowed
+            `}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
 
       {/* Slider */}
@@ -61,7 +88,6 @@ export function DAFControls() {
         />
         <div className="flex justify-between text-[10px] text-gray-600 px-0.5">
           <span>10ms</span>
-          <span>50ms</span>
           <span>100ms</span>
         </div>
       </div>
