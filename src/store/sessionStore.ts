@@ -21,6 +21,13 @@ export interface SessionState {
   lastDetection: StutterEvent | null;
   predictedWord: PredictionResult | null;
 
+  // DAF state
+  dafEnabled: boolean;
+  dafDelayMs: number;
+
+  // Session timing
+  sessionStartTime: number | null;
+
   setListening: (listening: boolean) => void;
   addFinalTranscript: (text: string) => void;
   setInterimText: (text: string) => void;
@@ -31,6 +38,11 @@ export interface SessionState {
   setPredictedWord: (result: PredictionResult) => void;
   clearPredictedWord: () => void;
   resetSession: () => void;
+
+  // DAF actions
+  setDafEnabled: (enabled: boolean) => void;
+  setDafDelayMs: (ms: number) => void;
+  setSessionStartTime: (time: number | null) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -44,7 +56,18 @@ export const useSessionStore = create<SessionState>()(
     lastDetection: null,
     predictedWord: null,
 
-    setListening: (listening) => set({ isListening: listening }),
+    // DAF defaults
+    dafEnabled: false,
+    dafDelayMs: 50,
+
+    // Session timing
+    sessionStartTime: null,
+
+    setListening: (listening) =>
+      set({
+        isListening: listening,
+        sessionStartTime: listening ? Date.now() : null,
+      }),
     addFinalTranscript: (text) =>
       set((state) => ({
         transcript: [
@@ -79,6 +102,14 @@ export const useSessionStore = create<SessionState>()(
         detectionEvents: [],
         lastDetection: null,
         predictedWord: null,
+        dafEnabled: false,
+        dafDelayMs: 50,
+        sessionStartTime: null,
       }),
+
+    // DAF actions
+    setDafEnabled: (enabled) => set({ dafEnabled: enabled }),
+    setDafDelayMs: (ms) => set({ dafDelayMs: ms }),
+    setSessionStartTime: (time) => set({ sessionStartTime: time }),
   }))
 );
