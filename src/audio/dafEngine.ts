@@ -2,7 +2,6 @@ export interface DAFEngine {
   enable: () => void;
   disable: () => void;
   setDelay: (ms: number) => void;
-  setGain: (db: number) => void;
   isEnabled: () => boolean;
   destroy: () => void;
 }
@@ -12,41 +11,56 @@ export function createDAFEngine(
   source: MediaStreamAudioSourceNode
 ): DAFEngine {
   // --- Audio processing chain ---
-  // source → highpass → compressor → gain → delay → destination
+  // source → highpass → lowpass → presence → compressor → gain → delay → destination
   //
-  // Highpass: cuts low rumble (AC, fans, footsteps) below 200Hz
-  // Compressor: boosts quiet speech, tames loud peaks — makes close voice consistent
-  // Gain: overall boost so your own voice is louder than background
-  // Delay: the DAF effect
+  // Goal: isolate the wearer's voice, make it clear and loud,
+  //       cut background noise without making it sound muffled.
 
-  // 1. High-pass filter — removes low-frequency background noise
+  // 1. High-pass — cut rumble below 100Hz (fans, HVAC, vibrations)
+  //    Keep it low so we don't lose the warmth of the voice
   const highpass = audioCtx.createBiquadFilter();
   highpass.type = 'highpass';
-  highpass.frequency.value = 200; // Cut below 200Hz (rumble, HVAC, traffic)
-  highpass.Q.value = 0.7; // Gentle roll-off
+  highpass.frequency.value = 100;
+  highpass.Q.value = 0.5; // Very gentle slope — no harsh cutoff
 
-  // 2. Compressor — boosts quiet speech (your voice) and suppresses loud sounds (others talking)
+  // 2. Low-pass — cut harsh high frequencies above 8kHz (hiss, sibilance)
+  const lowpass = audioCtx.createBiquadFilter();
+  lowpass.type = 'lowpass';
+  lowpass.frequency.value = 8000;
+  lowpass.Q.value = 0.5;
+
+  // 3. Presence boost — shelf boost at 2-4kHz where speech clarity lives
+  //    This is the key: makes the voice sound crisp and present without being tinny
+  const presence = audioCtx.createBiquadFilter();
+  presence.type = 'peaking';
+  presence.frequency.value = 3000; // 3kHz — speech intelligibility sweet spot
+  presence.Q.value = 1.0;         // Moderate width — covers 2-4kHz range
+  presence.gain.value = 5;        // +5dB boost at the clarity frequency
+
+  // 4. Compressor — gentle, just to even out volume (NOT aggressive)
+  //    Light ratio so it doesn't squash the voice or make it sound flat
   const compressor = audioCtx.createDynamicsCompressor();
-  compressor.threshold.value = -35; // Start compressing at -35dB (catches quiet speech)
-  compressor.knee.value = 10;       // Soft knee for natural sound
-  compressor.ratio.value = 4;       // 4:1 compression — strong enough to even out levels
-  compressor.attack.value = 0.005;  // 5ms attack — fast enough to catch speech onset
-  compressor.release.value = 0.15;  // 150ms release — smooth, no pumping
+  compressor.threshold.value = -25; // Only compress louder parts
+  compressor.knee.value = 20;       // Very soft knee — transparent compression
+  compressor.ratio.value = 2;       // 2:1 — gentle, keeps dynamics natural
+  compressor.attack.value = 0.01;   // 10ms — lets transients through
+  compressor.release.value = 0.2;   // 200ms — smooth release
 
-  // 3. Gain — boost the processed signal
+  // 5. Output gain — make the result louder
   const gainNode = audioCtx.createGain();
-  gainNode.gain.value = 2.0; // +6dB boost — makes your close-mic voice noticeably louder
+  gainNode.gain.value = 3.0; // ~+10dB — noticeably louder
 
-  // 4. Delay — the DAF effect
+  // 6. Delay — the DAF effect
   const delayNode = audioCtx.createDelay(0.2);
   delayNode.delayTime.value = 0.05;
 
-  // Wire the chain: source → highpass → compressor → gain → delay
+  // Wire: source → highpass → lowpass → presence → compressor → gain → delay
   source.connect(highpass);
-  highpass.connect(compressor);
+  highpass.connect(lowpass);
+  lowpass.connect(presence);
+  presence.connect(compressor);
   compressor.connect(gainNode);
   gainNode.connect(delayNode);
-  // delay → destination is controlled by enable/disable
 
   let enabled = false;
 
@@ -59,7 +73,7 @@ export function createDAFEngine(
 
   function disable(): void {
     if (enabled) {
-      try { delayNode.disconnect(audioCtx.destination); } catch { /* already disconnected */ }
+      try { delayNode.disconnect(audioCtx.destination); } catch { /* */ }
       enabled = false;
     }
   }
@@ -67,12 +81,6 @@ export function createDAFEngine(
   function setDelay(ms: number): void {
     const clamped = Math.min(100, Math.max(10, ms));
     delayNode.delayTime.setValueAtTime(clamped / 1000, audioCtx.currentTime);
-  }
-
-  function setGain(db: number): void {
-    // Convert dB to linear gain: 0dB=1.0, +6dB=2.0, +12dB=4.0
-    const linear = Math.pow(10, db / 20);
-    gainNode.gain.setValueAtTime(linear, audioCtx.currentTime);
   }
 
   function isEnabled(): boolean {
@@ -85,10 +93,12 @@ export function createDAFEngine(
       enabled = false;
     }
     try { source.disconnect(highpass); } catch { /* */ }
-    try { highpass.disconnect(compressor); } catch { /* */ }
+    try { highpass.disconnect(lowpass); } catch { /* */ }
+    try { lowpass.disconnect(presence); } catch { /* */ }
+    try { presence.disconnect(compressor); } catch { /* */ }
     try { compressor.disconnect(gainNode); } catch { /* */ }
     try { gainNode.disconnect(delayNode); } catch { /* */ }
   }
 
-  return { enable, disable, setDelay, setGain, isEnabled, destroy };
+  return { enable, disable, setDelay, isEnabled, destroy };
 }
