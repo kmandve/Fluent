@@ -31,10 +31,11 @@ export function useAudioPipeline() {
     const dafEngine = createDAFEngine(analyzer.getAudioContext(), analyzer.getSource());
     dafEngineRef.current = dafEngine;
 
-    // Apply current store state to DAF engine
-    const { dafEnabled, dafDelayMs } = useSessionStore.getState();
+    // Auto-enable DAF when listening starts
+    const { dafDelayMs } = useSessionStore.getState();
     dafEngine.setDelay(dafDelayMs);
-    if (dafEnabled) dafEngine.enable();
+    dafEngine.enable();
+    useSessionStore.getState().setDafEnabled(true);
 
     // Run ambient noise calibration (non-blocking — detector works with default
     // threshold until calibration completes)
