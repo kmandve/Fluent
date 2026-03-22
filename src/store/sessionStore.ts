@@ -26,6 +26,9 @@ export interface SessionState {
   // Session timing
   sessionStartTime: number | null;
 
+  // Mic selection
+  selectedMicId: string | null;
+
   setListening: (listening: boolean) => void;
   addFinalTranscript: (text: string) => void;
   setInterimText: (text: string) => void;
@@ -39,6 +42,7 @@ export interface SessionState {
   setDafEnabled: (enabled: boolean) => void;
   setDafDelayMs: (ms: number) => void;
   setSessionStartTime: (time: number | null) => void;
+  setSelectedMicId: (id: string | null) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -57,6 +61,9 @@ export const useSessionStore = create<SessionState>()(
 
     // Session timing
     sessionStartTime: null,
+
+    // Mic selection
+    selectedMicId: null,
 
     setListening: (listening) =>
       set({
@@ -103,5 +110,6 @@ export const useSessionStore = create<SessionState>()(
     setDafEnabled: (enabled) => set({ dafEnabled: enabled }),
     setDafDelayMs: (ms) => set({ dafDelayMs: ms }),
     setSessionStartTime: (time) => set({ sessionStartTime: time }),
+    setSelectedMicId: (id) => set({ selectedMicId: id }),
   }))
 );

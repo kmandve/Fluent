@@ -6,6 +6,7 @@ import { DAFControls } from './DAFControls';
 import { SessionStats } from './SessionStats';
 import { TranscriptDisplay } from './TranscriptDisplay';
 import { DetectionLog } from './DetectionLog';
+import { MicSelector } from './MicSelector';
 import { useSessionStore } from '../store/sessionStore';
 
 interface DashboardProps {
@@ -57,6 +58,11 @@ export function Dashboard({ analyzer, start, stop, isListening }: DashboardProps
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up delay-200">
           <DAFControls />
           <SessionStats />
+        </div>
+
+        {/* Mic selector — only shows when multiple mics available */}
+        <div className="animate-slide-up delay-200">
+          <MicSelector />
         </div>
 
         {/* Bottom panels */}

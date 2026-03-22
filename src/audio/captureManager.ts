@@ -106,9 +106,15 @@ export function createCaptureManager(): CaptureManager {
         console.warn('[captureManager] recognition.start() threw:', _e);
       }
 
-      // Then get getUserMedia stream for the acoustic energy track
+      // Then get getUserMedia stream — use selected mic if set
+      const selectedMicId = useSessionStore.getState().selectedMicId;
+      const audioConstraints: MediaTrackConstraints = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        ...(selectedMicId ? { deviceId: { exact: selectedMicId } } : {}),
+      };
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true },
+        audio: audioConstraints,
       });
       mediaStream = stream;
       console.debug('[captureManager] getUserMedia stream obtained');
