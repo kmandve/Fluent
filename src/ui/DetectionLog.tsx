@@ -33,15 +33,12 @@ function EventDetail({ event }: { event: StutterEvent }) {
 
 export function DetectionLog() {
   const detectionEvents = useSessionStore((s) => s.detectionEvents);
-  const isListening = useSessionStore((s) => s.isListening);
-
-  if (!isListening) return null;
 
   // Show most recent events first, max 10 visible
   const visibleEvents = [...detectionEvents].reverse().slice(0, 10);
 
   return (
-    <div className="mt-4 w-full max-w-2xl">
+    <div className="w-full">
       <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
         Detection Log
       </h2>

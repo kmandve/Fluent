@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { TranscriptDisplay } from './TranscriptDisplay';
-import { ControlBar } from './ControlBar';
+import { useEffect } from 'react';
 import { ErrorOverlay } from './ErrorOverlay';
-import { DetectionLog } from './DetectionLog';
+import { Dashboard } from './Dashboard';
 import { isSpeechRecognitionSupported } from '../utils/browserCompat';
 import { useSessionStore } from '../store/sessionStore';
 import { useAudioPipeline } from '../hooks/useAudioPipeline';
@@ -10,13 +8,9 @@ import { usePredictionPipeline } from '../hooks/usePredictionPipeline';
 import { useTTSOutput } from '../hooks/useTTSOutput';
 
 export function App() {
-  const { start, stop, isListening, captureManager } = useAudioPipeline();
+  const { start, stop, isListening, captureManager, analyzer } = useAudioPipeline();
   usePredictionPipeline();
   useTTSOutput(captureManager);
-
-  const lastDetection = useSessionStore((s) => s.lastDetection);
-  const [highlightActive, setHighlightActive] = useState(false);
-  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check browser support on mount — set error state if unsupported
   useEffect(() => {
@@ -25,62 +19,17 @@ export function App() {
     }
   }, []);
 
-  // Pulse the transcript container for 800ms whenever a new detection event fires
-  useEffect(() => {
-    if (!lastDetection) return;
-
-    setHighlightActive(true);
-
-    if (highlightTimerRef.current) {
-      clearTimeout(highlightTimerRef.current);
-    }
-    highlightTimerRef.current = setTimeout(() => {
-      setHighlightActive(false);
-      highlightTimerRef.current = null;
-    }, 800);
-
-    return () => {
-      if (highlightTimerRef.current) {
-        clearTimeout(highlightTimerRef.current);
-      }
-    };
-  }, [lastDetection]);
-
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold mb-2">Fluent</h1>
-      <p className="text-gray-400 mb-6">Real-time speech assistance</p>
-      <div className="w-full max-w-2xl flex-1 flex flex-col">
-        {/* Transcript with detection highlight pulse */}
-        <div
-          className={`rounded-lg transition-all duration-300 ${
-            highlightActive ? 'ring-2 ring-amber-400/60' : 'ring-2 ring-transparent'
-          }`}
-        >
-          <TranscriptDisplay />
-        </div>
-
-        <div className="mt-4">
-          <ControlBar start={start} stop={stop} isListening={isListening} />
-        </div>
-
-        {/* Detection log panel — only visible during active session */}
-        <DetectionLog />
-
-        {/* TTS test button */}
-        <button
-          onClick={() => {
-            const u = new SpeechSynthesisUtterance('hello');
-            u.volume = 1;
-            speechSynthesis.speak(u);
-          }}
-          className="mt-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-400 transition-colors"
-        >
-          Test Speaker
-        </button>
-      </div>
+    <>
+      <Dashboard
+        analyzer={analyzer}
+        start={start}
+        stop={stop}
+        isListening={isListening}
+        captureManager={captureManager}
+      />
       <ErrorOverlay />
-    </div>
+    </>
   );
 }
 

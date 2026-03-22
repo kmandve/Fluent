@@ -16,7 +16,7 @@ export function TranscriptDisplay() {
   const isEmpty = transcript.length === 0 && !interimText;
 
   return (
-    <div className="overflow-y-auto max-h-[70vh] bg-gray-900 rounded-lg p-4 min-h-[200px] flex flex-col">
+    <div className="overflow-y-auto max-h-[30vh] bg-gray-900 p-4 min-h-[80px] flex flex-col">
       {isEmpty && !isListening ? (
         <p className="text-gray-500 italic text-lg text-center mt-8">
           Click Start to begin...
