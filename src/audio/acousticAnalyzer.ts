@@ -7,7 +7,7 @@ export interface AcousticAnalyzer {
 }
 
 export function createAcousticAnalyzer(stream: MediaStream): AcousticAnalyzer {
-  const audioCtx = new AudioContext();
+  const audioCtx = new AudioContext({ latencyHint: 'interactive' });
   const source = audioCtx.createMediaStreamSource(stream);
   const analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;

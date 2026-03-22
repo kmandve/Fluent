@@ -106,15 +106,16 @@ export function createCaptureManager(): CaptureManager {
         console.warn('[captureManager] recognition.start() threw:', _e);
       }
 
-      // Then get getUserMedia stream — use selected mic if set
+      // Get getUserMedia stream — disable all browser audio processing for lowest latency
       const selectedMicId = useSessionStore.getState().selectedMicId;
-      const audioConstraints: MediaTrackConstraints = {
-        echoCancellation: true,
-        noiseSuppression: true,
-        ...(selectedMicId ? { deviceId: { exact: selectedMicId } } : {}),
-      };
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: audioConstraints,
+        audio: {
+          echoCancellation: false,
+          autoGainControl: false,
+          noiseSuppression: false,
+          channelCount: 1,
+          ...(selectedMicId ? { deviceId: { exact: selectedMicId } } : {}),
+        },
       });
       mediaStream = stream;
       console.debug('[captureManager] getUserMedia stream obtained');
