@@ -55,7 +55,12 @@ describe('createCaptureManager', () => {
     const stream = await manager.start();
 
     expect(mockGetUserMedia).toHaveBeenCalledWith({
-      audio: { echoCancellation: true, noiseSuppression: true },
+      audio: {
+        echoCancellation: false,
+        autoGainControl: false,
+        noiseSuppression: false,
+        channelCount: 1,
+      },
     });
     expect(stream).toBe(mockStream);
     expect(manager.isActive()).toBe(true);
