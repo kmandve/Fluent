@@ -12,7 +12,6 @@ export function App() {
   usePredictionPipeline();
   useTTSOutput(captureManager);
 
-  // Check browser support on mount — set error state if unsupported
   useEffect(() => {
     if (!isSpeechRecognitionSupported()) {
       useSessionStore.getState().setErrorState('unsupported');
