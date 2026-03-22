@@ -6,8 +6,8 @@ import { useSessionStore } from '../store/sessionStore';
 import { createStutterDetector, calibrateAmbientNoise } from '../detection/stutterDetector';
 
 // VAD constants for speech-gated DAF
-// Set high so only the wearer's voice (close to mic) triggers DAF — not others in the room
-const VAD_RMS_THRESHOLD = 0.04;
+// Threshold for speech detection — only the wearer's voice (close to mic) triggers DAF
+const VAD_RMS_THRESHOLD = 0.02;
 const VAD_HANGOVER_MS = 2000;
 const CUE_FREQ_ON = 520;
 const CUE_FREQ_OFF = 380;
@@ -93,6 +93,11 @@ export function useAudioPipeline() {
       // --- VAD: speech-gated DAF ---
       const now = Date.now();
       const isSpeech = rms > VAD_RMS_THRESHOLD;
+
+      // Debug: log every 2s so you can see RMS vs threshold
+      if (now % 2000 < 100) {
+        console.debug('[VAD] rms:', rms.toFixed(4), 'threshold:', VAD_RMS_THRESHOLD, 'speech:', isSpeech, 'dafActive:', vadActiveRef.current);
+      }
 
       if (isSpeech) {
         lastSpeechTimeRef.current = now;
