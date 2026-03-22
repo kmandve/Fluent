@@ -85,16 +85,6 @@ Plans:
 - [ ] 03-01-PLAN.md — Local prediction layer: types, word frequency data, bigram index, localPredictor, contextBuilder, store extension
 - [x] 03-02-PLAN.md — LLM client (OpenAI streaming), prediction engine orchestrator, usePredictionPipeline hook wiring
 
-### Phase 5: Web DAF Dashboard — Build a browser-based DAF app for Mac using Web Audio API with a full dashboard showing statistics, DAF on/off toggle, delay controls, and session history
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 4
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 5 to break down)
-
 ---
 
 ### Phase 4: TTS Integration and Echo Prevention
@@ -116,3 +106,26 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — TTS speechOutput factory, captureManager pauseRecognition/resumeRecognition extension, test mocks
 - [x] 04-02-PLAN.md — useTTSOutput hook wiring, TranscriptDisplay highlight, App integration, end-to-end verification
+
+---
+
+### Phase 5: Web DAF Dashboard
+
+**Goal**: A unified browser-based dashboard combining DAF (Delayed Auditory Feedback) controls with stutter detection monitoring -- DAF on/off toggle, 10-100ms delay slider, live audio waveform, session timer, and stutter statistics, all on a single dark-themed page.
+
+**Depends on:** Phase 4
+
+**Requirements**: DAF-01 (dashboard UI), DAF-02 (delay control), DAF-03 (session stats), DAF-04 (stutter logging)
+
+**Success Criteria** (what must be TRUE):
+  1. User sees a single-page dashboard with DAF controls, waveform, session timer, and stutter stats
+  2. DAF toggle plays mic audio back through speakers with configurable 10-100ms delay
+  3. Delay slider adjusts in real-time without stopping the session
+  4. Stutter detection continues running and logging events while DAF is active
+  5. Dashboard uses dark minimal styling suitable for hackathon demo
+
+**Plans:** 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — DAF engine (Web Audio DelayNode), store extensions (DAF state + session timing), audio pipeline wiring
+- [ ] 05-02-PLAN.md — Dashboard UI (WaveformDisplay, DAFControls, SessionStats, Dashboard layout, App rewrite)
