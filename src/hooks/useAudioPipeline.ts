@@ -1,12 +1,14 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { createCaptureManager } from '../audio/captureManager';
 import { createAcousticAnalyzer, type AcousticAnalyzer } from '../audio/acousticAnalyzer';
+import { createDAFEngine, type DAFEngine } from '../audio/dafEngine';
 import { useSessionStore } from '../store/sessionStore';
 import { createStutterDetector, calibrateAmbientNoise } from '../detection/stutterDetector';
 
 export function useAudioPipeline() {
   const captureManagerRef = useRef(createCaptureManager());
   const analyzerRef = useRef<AcousticAnalyzer | null>(null);
+  const dafEngineRef = useRef<DAFEngine | null>(null);
   const energyIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const detectorRef = useRef<ReturnType<typeof createStutterDetector> | null>(null);
   const isListening = useSessionStore((s) => s.isListening);
@@ -24,6 +26,15 @@ export function useAudioPipeline() {
     // Create stutter detector
     const detector = createStutterDetector();
     detectorRef.current = detector;
+
+    // Create DAF engine reusing the same AudioContext and source node
+    const dafEngine = createDAFEngine(analyzer.getAudioContext(), analyzer.getSource());
+    dafEngineRef.current = dafEngine;
+
+    // Apply current store state to DAF engine
+    const { dafEnabled, dafDelayMs } = useSessionStore.getState();
+    dafEngine.setDelay(dafDelayMs);
+    if (dafEnabled) dafEngine.enable();
 
     // Run ambient noise calibration (non-blocking — detector works with default
     // threshold until calibration completes)
@@ -46,6 +57,12 @@ export function useAudioPipeline() {
   }, []);
 
   const stop = useCallback(() => {
+    // Destroy DAF engine before stopping analyzer (DAF holds refs to audioCtx nodes)
+    if (dafEngineRef.current) {
+      dafEngineRef.current.destroy();
+      dafEngineRef.current = null;
+    }
+
     // Reset stutter detector
     if (detectorRef.current) {
       detectorRef.current.reset();
@@ -58,7 +75,7 @@ export function useAudioPipeline() {
       energyIntervalRef.current = null;
     }
 
-    // Stop acoustic analyzer
+    // Stop acoustic analyzer (closes AudioContext)
     if (analyzerRef.current) {
       analyzerRef.current.stop();
       analyzerRef.current = null;
@@ -71,5 +88,27 @@ export function useAudioPipeline() {
     useSessionStore.getState().setEnergyLevel(0);
   }, []);
 
-  return { start, stop, isListening, captureManager: captureManagerRef.current };
+  // Subscribe to DAF state changes from store and apply to engine
+  useEffect(() => {
+    const unsub = useSessionStore.subscribe(
+      (s) => ({ dafEnabled: s.dafEnabled, dafDelayMs: s.dafDelayMs }),
+      ({ dafEnabled, dafDelayMs }) => {
+        const engine = dafEngineRef.current;
+        if (!engine) return;
+        engine.setDelay(dafDelayMs);
+        if (dafEnabled) engine.enable();
+        else engine.disable();
+      },
+      { equalityFn: (a, b) => a.dafEnabled === b.dafEnabled && a.dafDelayMs === b.dafDelayMs }
+    );
+    return unsub;
+  }, []);
+
+  return {
+    start,
+    stop,
+    isListening,
+    captureManager: captureManagerRef.current,
+    analyzer: analyzerRef.current,
+  };
 }

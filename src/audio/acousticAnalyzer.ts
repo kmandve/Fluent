@@ -1,5 +1,8 @@
 export interface AcousticAnalyzer {
   getRMS: () => number;
+  getAnalyserNode: () => AnalyserNode;
+  getAudioContext: () => AudioContext;
+  getSource: () => MediaStreamAudioSourceNode;
   stop: () => void;
 }
 
@@ -21,9 +24,21 @@ export function createAcousticAnalyzer(stream: MediaStream): AcousticAnalyzer {
     return Math.sqrt(sumSquares / buffer.length);
   }
 
+  function getAnalyserNode(): AnalyserNode {
+    return analyser;
+  }
+
+  function getAudioContext(): AudioContext {
+    return audioCtx;
+  }
+
+  function getSource(): MediaStreamAudioSourceNode {
+    return source;
+  }
+
   function stop() {
     audioCtx.close();
   }
 
-  return { getRMS, stop };
+  return { getRMS, getAnalyserNode, getAudioContext, getSource, stop };
 }
