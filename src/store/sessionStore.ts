@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import type { StutterEvent } from '../detection/types';
-import type { PredictionResult } from '../prediction/types';
 
 export interface TranscriptEntry {
   id: string;
@@ -19,7 +18,6 @@ export interface SessionState {
 
   detectionEvents: StutterEvent[];
   lastDetection: StutterEvent | null;
-  predictedWord: PredictionResult | null;
 
   // DAF state
   dafEnabled: boolean;
@@ -35,8 +33,6 @@ export interface SessionState {
   setErrorState: (state: SessionState['errorState']) => void;
   addDetectionEvent: (event: StutterEvent) => void;
   clearDetectionEvents: () => void;
-  setPredictedWord: (result: PredictionResult) => void;
-  clearPredictedWord: () => void;
   resetSession: () => void;
 
   // DAF actions
@@ -54,7 +50,6 @@ export const useSessionStore = create<SessionState>()(
     errorState: 'none',
     detectionEvents: [],
     lastDetection: null,
-    predictedWord: null,
 
     // DAF defaults
     dafEnabled: false,
@@ -90,8 +85,6 @@ export const useSessionStore = create<SessionState>()(
         lastDetection: event,
       })),
     clearDetectionEvents: () => set({ detectionEvents: [], lastDetection: null }),
-    setPredictedWord: (result) => set({ predictedWord: result }),
-    clearPredictedWord: () => set({ predictedWord: null }),
     resetSession: () =>
       set({
         isListening: false,
@@ -101,7 +94,6 @@ export const useSessionStore = create<SessionState>()(
         errorState: 'none',
         detectionEvents: [],
         lastDetection: null,
-        predictedWord: null,
         dafEnabled: false,
         dafDelayMs: 50,
         sessionStartTime: null,

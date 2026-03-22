@@ -6,7 +6,8 @@ import { useSessionStore } from '../store/sessionStore';
 import { createStutterDetector, calibrateAmbientNoise } from '../detection/stutterDetector';
 
 // VAD constants for speech-gated DAF
-const VAD_RMS_THRESHOLD = 0.015;
+// Set high so only the wearer's voice (close to mic) triggers DAF — not others in the room
+const VAD_RMS_THRESHOLD = 0.04;
 const VAD_HANGOVER_MS = 2000;
 const CUE_FREQ_ON = 880;
 const CUE_FREQ_OFF = 440;
